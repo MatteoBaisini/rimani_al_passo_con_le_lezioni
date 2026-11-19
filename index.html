@@ -3,939 +3,562 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
-  <title>Recupero Lezioni</title>
-  <meta name="theme-color" content="#111113" />
+  <title>Recupero Lezioni — PoliMi</title>
+
+  <!-- PWA / iOS Web App Meta Tags -->
+  <meta name="theme-color" content="#F6F6F4" id="themeColorMeta" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Recuperi" />
   <link rel="manifest" href="manifest.json" />
   <link rel="icon" type="image/svg+xml" href="icon.svg" />
   <link rel="apple-touch-icon" href="icon.svg" />
+
+  <!-- Optional external config for GitHub Pages / Supabase -->
   <script src="config.js"></script>
-  <style>
-    :root {
-      --bg: #FBFBFB;
-      --surface: #FFFFFF;
-      --surface-hover: #F4F4F5;
-      --surface-active: #EFEFF1;
-      --border: #E5E5E7;
-      --border-subtle: #EFEFF1;
-      --text: #111113;
-      --text-secondary: #52525B;
-      --text-muted: #8E8E93;
-      --accent: #111113;
-      --accent-text: #FFFFFF;
-      --danger: #DC2626;
-      --success: #059669;
-      --warning: #D97706;
-      --radius: 8px;
-      --radius-lg: 12px;
-      --shadow: 0 1px 2px rgba(0,0,0,0.04);
-      --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
-      --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
-      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
-    }
 
-    [data-theme="dark"] {
-      --bg: #0D0D0F;
-      --surface: #141417;
-      --surface-hover: #1C1C21;
-      --surface-active: #232329;
-      --border: #26262C;
-      --border-subtle: #1D1D22;
-      --text: #F4F4F5;
-      --text-secondary: #A1A1AA;
-      --text-muted: #71717A;
-      --accent: #F4F4F5;
-      --accent-text: #0D0D0F;
-      --danger: #F87171;
-      --success: #34D399;
-      --warning: #FBBF24;
-      --shadow: 0 1px 2px rgba(0,0,0,0.3);
-      --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
-    }
+  <!-- Typography: Plus Jakarta Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    html, body {
-      height: 100%;
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--font);
-      font-size: 14px;
-      line-height: 1.45;
-      -webkit-font-smoothing: antialiased;
-    }
-
-    button, input, select, textarea {
-      font-family: inherit;
-      font-size: inherit;
-      color: inherit;
-    }
-
-    .app {
-      display: grid;
-      grid-template-columns: 260px 1fr;
-      min-height: 100vh;
-    }
-
-    /* Sidebar */
-    .sidebar {
-      background: var(--surface);
-      border-right: 1px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      padding: 16px 12px;
-      position: sticky;
-      top: 0;
-      height: 100vh;
-      overflow-y: auto;
-      z-index: 30;
-    }
-
-    .brand {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 4px 8px 16px;
-    }
-    .brand-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-weight: 600;
-      font-size: 14px;
-      letter-spacing: -0.01em;
-    }
-    .brand-mark {
-      width: 20px;
-      height: 20px;
-      border-radius: 5px;
-      background: var(--accent);
-      color: var(--accent-text);
-      display: grid;
-      place-items: center;
-      font-size: 11px;
-      font-weight: 700;
-    }
-
-    .nav-section-label {
-      font-size: 11px;
-      font-weight: 600;
-      text-transform: uppercase;
-      letter-spacing: 0.05em;
-      color: var(--text-muted);
-      padding: 12px 10px 6px;
-    }
-
-    .nav-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-      padding: 7px 10px;
-      border: none;
-      background: transparent;
-      border-radius: 7px;
-      cursor: pointer;
-      color: var(--text-secondary);
-      transition: background 0.12s, color 0.12s;
-      text-align: left;
-    }
-    .nav-item:hover { background: var(--surface-hover); color: var(--text); }
-    .nav-item.active { background: var(--surface-active); color: var(--text); font-weight: 500; }
-    .nav-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
-    .nav-left span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-    .count {
-      font-family: var(--mono);
-      font-size: 11px;
-      color: var(--text-muted);
-      padding: 1px 6px;
-      border-radius: 99px;
-      background: var(--bg);
-    }
-
-    .sidebar-controls {
-      margin-top: auto;
-      padding-top: 14px;
-      border-top: 1px solid var(--border-subtle);
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    .control-row {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 6px;
-      font-size: 12px;
-      color: var(--text-secondary);
-    }
-    .control-row select, .control-row input[type="number"] {
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 3px 6px;
-      font-size: 12px;
-      font-family: var(--mono);
-      width: 72px;
-      text-align: right;
-    }
-
-    .sync-pill {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 8px 10px;
-      border-radius: 8px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      cursor: pointer;
-      font-size: 12px;
-      transition: border-color 0.15s;
-    }
-    .sync-pill:hover { border-color: var(--text-muted); }
-    .sync-status { display: flex; align-items: center; gap: 7px; }
-    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
-    .sync-dot.ok { background: var(--success); }
-    .sync-dot.busy { background: var(--warning); }
-    .sync-dot.err { background: var(--danger); }
-
-    /* Main */
-    .main {
-      display: flex;
-      flex-direction: column;
-      min-width: 0;
-    }
-
-    .topbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 14px 28px;
-      border-bottom: 1px solid var(--border);
-      background: var(--surface);
-      position: sticky;
-      top: 0;
-      z-index: 20;
-    }
-    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
-    .mobile-menu-btn {
-      display: none;
-      background: transparent;
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      width: 34px;
-      height: 34px;
-      place-items: center;
-      cursor: pointer;
-    }
-    .view-title { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; }
-    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
-
-    .btn {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      padding: 7px 12px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--text);
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: background 0.12s, border-color 0.12s;
-      white-space: nowrap;
-    }
-    .btn:hover { background: var(--surface-hover); }
-    .btn-primary {
-      background: var(--accent);
-      color: var(--accent-text);
-      border-color: var(--accent);
-    }
-    .btn-primary:hover { opacity: 0.9; background: var(--accent); }
-    .btn-ghost { border-color: transparent; background: transparent; padding: 6px 8px; }
-    .btn-ghost:hover { background: var(--surface-hover); }
-    .btn-danger { color: var(--danger); }
-
-    .content {
-      padding: 24px 28px 64px;
-      max-width: 1040px;
-      width: 100%;
-    }
-
-    /* Metrics strip */
-    .metrics {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 12px;
-      margin-bottom: 22px;
-    }
-    .metric-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      padding: 14px 16px;
-      box-shadow: var(--shadow);
-    }
-    .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
-    .metric-value {
-      font-size: 22px;
-      font-weight: 600;
-      letter-spacing: -0.02em;
-      font-family: var(--mono);
-    }
-    .metric-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
-
-    /* Analisi banner */
-    .banner {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 14px 18px;
-      border-radius: var(--radius-lg);
-      border: 1px solid var(--border);
-      background: var(--surface);
-      margin-bottom: 18px;
-    }
-    .banner-text h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
-    .banner-text p { font-size: 12.5px; color: var(--text-secondary); }
-
-    /* Filter bar */
-    .toolbar {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      margin-bottom: 12px;
-      flex-wrap: wrap;
-    }
-    .segmented {
-      display: inline-flex;
-      background: var(--surface-hover);
-      padding: 3px;
-      border-radius: 8px;
-      border: 1px solid var(--border-subtle);
-    }
-    .seg-btn {
-      border: none;
-      background: transparent;
-      padding: 4px 10px;
-      border-radius: 6px;
-      font-size: 12px;
-      color: var(--text-secondary);
-      cursor: pointer;
-      font-weight: 500;
-    }
-    .seg-btn.active {
-      background: var(--surface);
-      color: var(--text);
-      box-shadow: var(--shadow);
-    }
-
-    .search-input {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 6px 10px;
-      font-size: 13px;
-      width: 220px;
-      outline: none;
-    }
-    .search-input:focus { border-color: var(--text-muted); }
-
-    /* Lesson List */
-    .list-card {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-    }
-
-    .lesson-row {
-      display: grid;
-      grid-template-columns: 32px 72px 1fr auto auto;
-      align-items: center;
-      gap: 12px;
-      padding: 11px 16px;
-      border-bottom: 1px solid var(--border-subtle);
-      cursor: pointer;
-      transition: background 0.1s;
-    }
-    .lesson-row:last-child { border-bottom: none; }
-    .lesson-row:hover { background: var(--surface-hover); }
-    .lesson-row.done { opacity: 0.55; }
-
-    .status-btn {
-      width: 24px;
-      height: 24px;
-      border-radius: 6px;
-      border: none;
-      background: transparent;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      color: var(--text-muted);
-    }
-    .status-btn:hover { background: var(--surface-active); color: var(--text); }
-
-    .course-tag {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      font-size: 12px;
-      font-weight: 600;
-      font-family: var(--mono);
-      color: var(--text-secondary);
-    }
-
-    .lesson-main { min-width: 0; }
-    .lesson-title-line {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-    .lesson-date {
-      font-family: var(--mono);
-      font-size: 12.5px;
-      font-weight: 500;
-      color: var(--text);
-    }
-    .lesson-topic {
-      font-size: 13px;
-      color: var(--text-secondary);
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-      max-width: 360px;
-    }
-    .pill {
-      font-size: 11px;
-      padding: 1px 7px;
-      border-radius: 99px;
-      border: 1px solid var(--border);
-      color: var(--text-secondary);
-      background: var(--bg);
-      white-space: nowrap;
-    }
-    .pill.cal {
-      border-color: rgba(5,150,105,0.3);
-      color: var(--success);
-      background: rgba(5,150,105,0.06);
-    }
-
-    .lesson-meta {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-family: var(--mono);
-      font-size: 12px;
-      color: var(--text-muted);
-    }
-    .stage-label {
-      font-family: var(--font);
-      font-size: 11.5px;
-      color: var(--text-secondary);
-      min-width: 78px;
-      text-align: right;
-    }
-
-    .row-actions {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-    }
-    .icon-btn {
-      width: 28px;
-      height: 28px;
-      border-radius: 6px;
-      border: 1px solid transparent;
-      background: transparent;
-      display: grid;
-      place-items: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
-    .icon-btn:hover { background: var(--surface-active); color: var(--text); border-color: var(--border); }
-
-    .empty-state {
-      padding: 48px 20px;
-      text-align: center;
-      color: var(--text-muted);
-      font-size: 13px;
-    }
-
-    /* Slide-over Drawer */
-    .overlay {
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.35);
-      backdrop-filter: blur(2px);
-      z-index: 40;
-      display: none;
-    }
-    .overlay.open { display: block; }
-
-    .drawer {
-      position: fixed;
-      top: 0;
-      right: 0;
-      height: 100vh;
-      width: 420px;
-      max-width: 100vw;
-      background: var(--surface);
-      border-left: 1px solid var(--border);
-      box-shadow: var(--shadow-lg);
-      z-index: 50;
-      transform: translateX(100%);
-      transition: transform 0.2s ease;
-      display: flex;
-      flex-direction: column;
-    }
-    .drawer.open { transform: translateX(0); }
-    .drawer-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-    }
-    .drawer-body {
-      padding: 20px;
-      overflow-y: auto;
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .drawer-footer {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    .field label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
-    .field input, .field select, .field textarea {
-      width: 100%;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      padding: 8px 10px;
-      outline: none;
-    }
-    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--text-muted); }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-    .stage-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 6px;
-    }
-    .stage-chip {
-      padding: 7px 6px;
-      border-radius: 7px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      font-size: 11.5px;
-      text-align: center;
-      cursor: pointer;
-      color: var(--text-secondary);
-    }
-    .stage-chip.active {
-      background: var(--accent);
-      color: var(--accent-text);
-      border-color: var(--accent);
-      font-weight: 500;
-    }
-
-    /* Modals */
-    .modal {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%) scale(0.98);
-      width: 480px;
-      max-width: calc(100vw - 24px);
-      max-height: 90vh;
-      overflow-y: auto;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-      z-index: 60;
-      display: none;
-    }
-    .modal.open { display: block; transform: translate(-50%, -50%) scale(1); }
-    .modal-header {
-      padding: 16px 20px;
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .modal-header h2 { font-size: 15px; font-weight: 600; }
-    .modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
-    .modal-footer {
-      padding: 14px 20px;
-      border-top: 1px solid var(--border);
-      display: flex;
-      justify-content: flex-end;
-      gap: 8px;
-      flex-wrap: wrap;
-    }
-
-    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
-    .chip {
-      padding: 5px 10px;
-      border-radius: 6px;
-      border: 1px solid var(--border);
-      background: var(--bg);
-      font-size: 12px;
-      cursor: pointer;
-    }
-    .chip:hover { border-color: var(--text-muted); }
-
-    .toast {
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      background: var(--accent);
-      color: var(--accent-text);
-      padding: 10px 14px;
-      border-radius: 8px;
-      font-size: 13px;
-      font-weight: 500;
-      box-shadow: var(--shadow-lg);
-      z-index: 100;
-      opacity: 0;
-      transform: translateY(8px);
-      transition: all 0.2s;
-      pointer-events: none;
-    }
-    .toast.show { opacity: 1; transform: translateY(0); }
-
-    .help-box {
-      font-size: 12px;
-      color: var(--text-secondary);
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      padding: 10px 12px;
-      line-height: 1.5;
-    }
-    .help-box code {
-      font-family: var(--mono);
-      font-size: 11px;
-      background: var(--surface-hover);
-      padding: 1px 4px;
-      border-radius: 4px;
-    }
-
-    /* Mobile / iPad Responsive */
-    @media (max-width: 860px) {
-      .app { grid-template-columns: 1fr; }
-      .sidebar {
-        position: fixed;
-        left: 0;
-        top: 0;
-        width: 270px;
-        transform: translateX(-100%);
-        transition: transform 0.2s ease;
-        box-shadow: var(--shadow-lg);
-      }
-      .sidebar.open { transform: translateX(0); }
-      .mobile-menu-btn { display: grid; }
-      .topbar { padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); }
-      .content { padding: 16px 14px 80px; }
-      .metrics { grid-template-columns: repeat(2, 1fr); gap: 8px; }
-      .metric-value { font-size: 18px; }
-      .lesson-row {
-        grid-template-columns: 28px 1fr auto;
-        gap: 8px;
-        padding: 11px 12px;
-      }
-      .course-tag { display: none; }
-      .lesson-meta { display: none; }
-      .search-input { width: 100%; }
-      .banner { flex-direction: column; align-items: flex-start; }
-    }
-  </style>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
+          },
+          colors: {
+            porcelain: '#F6F6F4',
+            obsidian: '#0B0B0E',
+            cardDark: '#131317',
+            cardDarkHover: '#1A1A20',
+          },
+          boxShadow: {
+            card: '0 1px 2px rgba(17,17,19,0.04), 0 4px 12px rgba(17,17,19,0.025)',
+            float: '0 12px 36px rgba(17,17,19,0.12), 0 2px 8px rgba(17,17,19,0.06)',
+          },
+        },
+      },
+    };
+  </script>
 </head>
-<body>
-  <div class="app">
-    <!-- Sidebar -->
-    <aside class="sidebar" id="sidebar">
-      <div class="brand">
-        <div class="brand-title">
-          <div class="brand-mark">R</div>
-          <span>Recupero Lezioni</span>
+<body class="bg-porcelain text-[#111113] dark:bg-obsidian dark:text-[#F4F4F5] font-sans antialiased selection:bg-[#111113] selection:text-white dark:selection:bg-[#F4F4F5] dark:selection:text-[#0B0B0E] overflow-x-hidden">
+
+  <!-- ===================================================================== -->
+  <!-- BACKDROP OVERLAY (Mobile Sidebar / Drawer / Modals)                   -->
+  <!-- ===================================================================== -->
+  <div id="overlay" onclick="closeAllOverlays()"
+    class="fixed inset-0 z-40 bg-black/30 dark:bg-black/60 backdrop-blur-[2px] hidden transition-opacity"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APP SHELL: FIXED SIDEBAR (256px) + MAIN WORKSPACE                     -->
+  <!-- ===================================================================== -->
+  <div class="flex min-h-screen w-full">
+
+    <!-- =================================================================== -->
+    <!-- LEFT SIDEBAR                                                        -->
+    <!-- =================================================================== -->
+    <aside id="sidebar"
+      class="fixed inset-y-0 left-0 z-50 w-[256px] shrink-0 bg-white/95 dark:bg-cardDark/95 backdrop-blur-md border-r border-black/[0.08] dark:border-white/[0.08] flex flex-col transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen transition-transform duration-200 ease-out">
+
+      <!-- Brand Header -->
+      <div class="h-16 px-4 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-7 h-7 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] flex items-center justify-center shrink-0 shadow-sm">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.85" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4.5 6.75h15m-15 5.25h10.5m-10.5 5.25h13.5" />
+            </svg>
+          </div>
+          <div class="min-w-0">
+            <div class="text-[14px] font-semibold tracking-tight leading-tight truncate">Recupero Lezioni</div>
+            <div class="text-[10.5px] font-mono text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · 2026</div>
+          </div>
         </div>
-        <button class="icon-btn" id="themeBtn" title="Cambia tema" aria-label="Cambia tema"></button>
+        <button id="themeBtn" onclick="toggleTheme()" title="Cambia tema" aria-label="Cambia tema"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] hover:text-[#111113] dark:hover:text-white transition">
+        </button>
       </div>
 
-      <button class="nav-item active" data-view="all">
-        <span class="nav-left">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
-          <span>Tutte le lezioni</span>
-        </span>
-        <span class="count" id="cnt-all">0</span>
-      </button>
+      <!-- Navigation -->
+      <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+        <!-- Primary Views -->
+        <div class="space-y-1">
+          <button id="nav-all" onclick="setView('all')"
+            class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] font-medium transition">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25H12" />
+              </svg>
+              <span class="truncate">Tutte le lezioni</span>
+            </span>
+            <span id="cnt-all" class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
+          </button>
 
-      <button class="nav-item" data-view="scheduled">
-        <span class="nav-left">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-          <span>Pianificate</span>
-        </span>
-        <span class="count" id="cnt-scheduled">0</span>
-      </button>
-
-      <div class="nav-section-label">Materie</div>
-      <div id="courseNav"></div>
-
-      <div class="sidebar-controls">
-        <div class="control-row">
-          <span>Velocità video</span>
-          <select id="speedSelect">
-            <option value="1">1.0x</option>
-            <option value="1.25">1.25x</option>
-            <option value="1.5">1.5x</option>
-            <option value="1.75">1.75x</option>
-            <option value="2">2.0x</option>
-          </select>
+          <button id="nav-scheduled" onclick="setView('scheduled')"
+            class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] font-medium transition">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5" />
+              </svg>
+              <span class="truncate">Pianificate</span>
+            </span>
+            <span id="cnt-scheduled" class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
+          </button>
         </div>
-        <div class="control-row">
-          <span>Ore/giorno</span>
-          <input type="number" id="dailyHoursInput" min="0.5" max="12" step="0.5" value="2" />
+
+        <!-- Courses List -->
+        <div>
+          <div class="px-2.5 mb-2 flex items-center justify-between">
+            <span class="text-[10.5px] font-semibold uppercase tracking-wider text-[#8E8E93]">Materie</span>
+            <button onclick="openTimetableModal()" class="text-[11px] font-medium text-[#71717A] hover:text-[#111113] dark:hover:text-white transition">
+              Orario
+            </button>
+          </div>
+          <div id="courseNav" class="space-y-1">
+            <!-- Populated by JS -->
+          </div>
         </div>
-        <button class="sync-pill" id="openSyncBtn">
-          <span class="sync-status">
-            <span class="sync-dot" id="syncDot"></span>
-            <span id="syncLabel">Solo locale</span>
+      </nav>
+
+      <!-- Bottom Controls: Playback Speed, Daily Goal, Sync Pill -->
+      <div class="p-3.5 border-t border-black/[0.06] dark:border-white/[0.06] space-y-3 bg-porcelain/50 dark:bg-obsidian/40 shrink-0">
+        <!-- Speed Pills -->
+        <div>
+          <div class="flex items-center justify-between mb-1.5">
+            <span class="text-[11px] font-medium text-[#71717A] dark:text-[#A1A1AA]">Velocità riproduzione</span>
+            <span id="speedIndicator" class="font-mono text-[11px] font-semibold tabular-nums">1.25x</span>
+          </div>
+          <div id="speedPills" class="grid grid-cols-5 gap-1 p-1 rounded-lg bg-black/[0.04] dark:bg-white/[0.06]">
+            <!-- Populated by JS -->
+          </div>
+        </div>
+
+        <!-- Daily Goal Stepper -->
+        <div class="flex items-center justify-between">
+          <span class="text-[11px] font-medium text-[#71717A] dark:text-[#A1A1AA]">Obiettivo al giorno</span>
+          <div class="inline-flex items-center rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark overflow-hidden">
+            <button onclick="stepDailyHours(-0.5)" aria-label="Riduci obiettivo"
+              class="w-7 h-7 flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
+            </button>
+            <span id="dailyHoursLabel" class="px-2 font-mono text-[12px] font-semibold tabular-nums min-w-[46px] text-center">2.0h</span>
+            <button onclick="stepDailyHours(0.5)" aria-label="Aumenta obiettivo"
+              class="w-7 h-7 flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition">
+              <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- Cloud Sync Status Pill -->
+        <button onclick="openSyncModal()"
+          class="w-full flex items-center justify-between px-3 py-2 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:border-black/[0.16] dark:hover:border-white/[0.16] transition shadow-sm">
+          <span class="flex items-center gap-2 min-w-0">
+            <span id="syncDot" class="w-2 h-2 rounded-full bg-[#A1A1AA] shrink-0"></span>
+            <span id="syncLabel" class="text-[12px] font-medium truncate">Solo locale</span>
           </span>
-          <span style="font-size:11px;color:var(--text-muted)">Config</span>
+          <span class="text-[11px] text-[#71717A] dark:text-[#8E8E93] font-medium shrink-0">Sync</span>
         </button>
       </div>
     </aside>
 
-    <!-- Main -->
-    <main class="main">
-      <header class="topbar">
-        <div class="topbar-left">
-          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+    <!-- =================================================================== -->
+    <!-- MAIN WORKSPACE                                                      -->
+    <!-- =================================================================== -->
+    <div class="flex-1 min-w-0 flex flex-col">
+
+      <!-- Sticky Topbar -->
+      <header class="sticky top-0 z-30 h-16 px-4 sm:px-7 border-b border-black/[0.07] dark:border-white/[0.07] bg-porcelain/85 dark:bg-obsidian/85 backdrop-blur-md flex items-center justify-between gap-3">
+        <div class="flex items-center gap-3 min-w-0">
+          <!-- Mobile Sidebar Button -->
+          <button onclick="openMobileSidebar()" aria-label="Apri menu"
+            class="lg:hidden w-9 h-9 -ml-1 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark flex items-center justify-center text-[#111113] dark:text-white shrink-0">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+            </svg>
           </button>
-          <h1 class="view-title" id="viewTitle">Tutte le lezioni</h1>
+
+          <div class="min-w-0">
+            <div class="flex items-center gap-2">
+              <span id="viewHeaderDot" class="w-2.5 h-2.5 rounded-full hidden shrink-0"></span>
+              <h1 id="viewTitle" class="text-[16px] sm:text-[17px] font-semibold tracking-tight truncate">Tutte le lezioni</h1>
+            </div>
+            <p id="viewSubtitle" class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums truncate"></p>
+          </div>
         </div>
-        <div class="topbar-actions">
-          <button class="btn" id="smartPickBtn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-            Ho X min
+
+        <!-- Topbar Actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button onclick="openTimetableModal()"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition shadow-sm">
+            <svg class="w-3.5 h-3.5 text-[#52525B] dark:text-[#A1A1AA]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6zm0 4.5h16.5M9.75 10.5v9.75" />
+            </svg>
+            <span class="hidden sm:inline">Orario</span>
           </button>
-          <button class="btn btn-primary" id="addLessonBtn">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-            Nuova
+
+          <button onclick="openSmartModal()"
+            class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition shadow-sm">
+            <svg class="w-3.5 h-3.5 text-[#52525B] dark:text-[#A1A1AA]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <span class="hidden md:inline">Ho X min</span>
+          </button>
+
+          <button onclick="openAddModal()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] hover:opacity-90 text-white dark:text-[#0B0B0E] text-[12.5px] font-medium transition shadow-sm">
+            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
+            </svg>
+            <span>Nuova</span>
           </button>
         </div>
       </header>
 
-      <div class="content">
-        <section class="metrics" id="metrics"></section>
-        <div id="specialBanner"></div>
+      <!-- Main Scroll Content -->
+      <main class="flex-1 w-full max-w-[1060px] mx-auto px-4 sm:px-7 py-6 pb-20 space-y-6">
 
-        <div class="toolbar">
-          <div class="segmented" id="stageFilter">
-            <button class="seg-btn active" data-filter="open">Da recuperare</button>
-            <button class="seg-btn" data-filter="all">Tutte</button>
-            <button class="seg-btn" data-filter="done">Completate</button>
+        <!-- KPI Summary Strip + Overall Completion Progress -->
+        <section class="space-y-3">
+          <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Populated by JS -->
           </div>
-          <input class="search-input" id="searchInput" type="search" placeholder="Cerca data, argomento..." />
-        </div>
+          <!-- Sleek Completion Progress Bar -->
+          <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl px-4 py-3 shadow-card">
+            <div class="flex items-center justify-between text-[11.5px] mb-2">
+              <span class="font-medium text-[#52525B] dark:text-[#A1A1AA]">Avanzamento complessivo</span>
+              <span id="overallPctText" class="font-mono font-semibold tabular-nums">0%</span>
+            </div>
+            <div class="h-1.5 w-full rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden">
+              <div id="overallProgressBar" class="h-full rounded-full bg-[#111113] dark:bg-[#F4F4F5] transition-all duration-300" style="width: 0%"></div>
+            </div>
+          </div>
+        </section>
 
-        <div class="list-card" id="lessonList"></div>
-      </div>
-    </main>
+        <!-- Course Overview Cards (only in "Tutte le lezioni") -->
+        <section id="courseOverviewSection" class="space-y-2.5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-[12px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">Panoramica materie</h2>
+            <span class="text-[11px] font-mono text-[#71717A] dark:text-[#8E8E93]">Slot 2h = 1h 30m · Slot 3h = 2h 15m</span>
+          </div>
+          <div id="courseOverviewGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <!-- Populated by JS -->
+          </div>
+        </section>
+
+        <!-- Special Banner for Analisi II -->
+        <section id="analisiBannerSection" class="hidden">
+          <!-- Populated by JS -->
+        </section>
+
+        <!-- Toolbar: Segmented Filter + Search -->
+        <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div id="stageFilter" class="inline-flex p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/[0.04] self-start">
+            <button data-filter="open" onclick="setFilter('open')" class="px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition">Da recuperare</button>
+            <button data-filter="all" onclick="setFilter('all')" class="px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition">Tutte</button>
+            <button data-filter="done" onclick="setFilter('done')" class="px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition">Completate</button>
+          </div>
+
+          <div class="relative w-full sm:w-64">
+            <svg class="w-4 h-4 text-[#8E8E93] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+            </svg>
+            <input id="searchInput" type="search" placeholder="Cerca data, argomento, note..."
+              class="w-full pl-9 pr-3 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark text-[13px] placeholder:text-[#8E8E93] focus:outline-none focus:border-black/25 dark:focus:border-white/25 transition shadow-sm" />
+          </div>
+        </section>
+
+        <!-- Lesson List Card -->
+        <section id="lessonList"
+          class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden divide-y divide-black/[0.06] dark:divide-white/[0.06]">
+          <!-- Populated by JS -->
+        </section>
+      </main>
+    </div>
   </div>
 
-  <!-- Overlay -->
-  <div class="overlay" id="overlay"></div>
-
-  <!-- Lesson Detail Drawer -->
-  <aside class="drawer" id="drawer">
-    <div class="drawer-header">
-      <div style="display:flex;align-items:center;gap:8px;font-weight:600" id="drawerHeading">Dettaglio lezione</div>
-      <button class="icon-btn" id="closeDrawerBtn" aria-label="Chiudi">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+  <!-- ===================================================================== -->
+  <!-- SLIDE-OVER DETAIL DRAWER                                              -->
+  <!-- ===================================================================== -->
+  <aside id="drawer"
+    class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white dark:bg-cardDark border-l border-black/[0.08] dark:border-white/[0.08] shadow-float flex flex-col transform translate-x-full transition-transform duration-200 ease-out">
+    <div class="h-16 px-5 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
+      <div id="drawerHeading" class="flex items-center gap-2 text-[14px] font-semibold truncate">Dettaglio lezione</div>
+      <button onclick="closeAllOverlays()" aria-label="Chiudi"
+        class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] hover:text-[#111113] dark:hover:text-white transition">
+        <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
       </button>
     </div>
-    <div class="drawer-body" id="drawerBody"></div>
-    <div class="drawer-footer">
-      <button class="btn btn-ghost btn-danger" id="deleteLessonBtn">Elimina</button>
-      <div style="display:flex;gap:8px">
-        <button class="btn" id="drawerCalBtn">Google Calendar</button>
-        <button class="btn btn-primary" id="saveDrawerBtn">Salva</button>
+
+    <div id="drawerBody" class="flex-1 overflow-y-auto p-5 space-y-4">
+      <!-- Populated by JS -->
+    </div>
+
+    <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2 shrink-0">
+      <div id="drawerDeleteWrap">
+        <button onclick="armDeleteLesson()" class="px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition">
+          Elimina
+        </button>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openCalFromDrawer()"
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+          </svg>
+          Calendar
+        </button>
+        <button onclick="saveDrawer()"
+          class="px-4 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
+          Salva
+        </button>
       </div>
     </div>
   </aside>
 
-  <!-- Add Lesson Modal -->
-  <div class="modal" id="addModal">
-    <div class="modal-header">
-      <h2>Aggiungi lezione</h2>
-      <button class="icon-btn" data-close-modal="addModal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="field-row">
-        <div class="field">
-          <label>Materia</label>
-          <select id="addCourse"></select>
+  <!-- ===================================================================== -->
+  <!-- MODAL: INTERACTIVE POLIMI TIMETABLE ("ORARIO POLIMI")                 -->
+  <!-- ===================================================================== -->
+  <div id="timetableModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-5 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-4xl max-h-[88vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
+        <div>
+          <h2 class="text-[15px] font-semibold tracking-tight">Orario PoliMi — Durate effettive</h2>
+          <p class="text-[12px] text-[#71717A] dark:text-[#8E8E93] mt-0.5">Slot da 2h = 1h 30m effettivi · Slot da 3h = 2h 15m effettivi. Clicca su uno slot per segnarlo perso.</p>
         </div>
-        <div class="field">
-          <label>Tipo</label>
-          <select id="addType">
-            <option value="Lezione">Lezione</option>
-            <option value="Esercitazione">Esercitazione</option>
-            <option value="Laboratorio">Laboratorio</option>
-          </select>
-        </div>
+        <button onclick="closeAllOverlays()" aria-label="Chiudi"
+          class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
       </div>
-      <div class="field-row">
-        <div class="field">
-          <label>Data originale</label>
-          <input type="date" id="addDate" />
-        </div>
-        <div class="field">
-          <label>Durata (minuti)</label>
-          <input type="number" id="addDuration" value="120" min="15" step="15" />
-        </div>
-      </div>
-      <div class="field">
-        <label>Argomento (opzionale)</label>
-        <input type="text" id="addTopic" placeholder="es. Teorema di Green, Pipeline MIPS..." />
-      </div>
-      <div class="field">
-        <label>Link registrazione (opzionale)</label>
-        <input type="url" id="addUrl" placeholder="https://..." />
-      </div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" data-close-modal="addModal">Annulla</button>
-      <button class="btn btn-primary" id="confirmAddBtn">Aggiungi</button>
-    </div>
-  </div>
-
-  <!-- Google Calendar Modal -->
-  <div class="modal" id="calModal">
-    <div class="modal-header">
-      <h2>Pianifica su Google Calendar</h2>
-      <button class="icon-btn" data-close-modal="calModal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div id="calLessonSummary" style="font-size:13px;font-weight:500"></div>
-      <div class="chip-row" id="calQuickChips"></div>
-      <div class="field-row">
-        <div class="field">
-          <label>Giorno</label>
-          <input type="date" id="calDate" />
-        </div>
-        <div class="field">
-          <label>Ora inizio</label>
-          <input type="time" id="calTime" value="15:00" />
-        </div>
-      </div>
-      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
-        <input type="checkbox" id="calBuffer" checked />
-        <span>Aggiungi +15 min di margine per appunti</span>
-      </label>
-      <div class="help-box" id="calDurationInfo"></div>
-    </div>
-    <div class="modal-footer">
-      <button class="btn" id="downloadIcsBtn">Scarica .ics</button>
-      <button class="btn btn-primary" id="openGcalBtn">Apri Google Calendar</button>
-    </div>
-  </div>
-
-  <!-- Smart Pick Modal -->
-  <div class="modal" id="smartModal">
-    <div class="modal-header">
-      <h2>Ho X minuti liberi</h2>
-      <button class="icon-btn" data-close-modal="smartModal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="field">
-        <label>Quanto tempo hai adesso? (minuti)</label>
-        <input type="number" id="smartMinutes" value="90" min="30" max="360" step="15" />
-      </div>
-      <div class="chip-row">
-        <button class="chip" data-mins="60">60 min</button>
-        <button class="chip" data-mins="90">90 min</button>
-        <button class="chip" data-mins="120">2 ore</button>
-        <button class="chip" data-mins="150">2h 30m</button>
-      </div>
-      <div id="smartResults" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
-    </div>
-  </div>
-
-  <!-- Sync & Backup Modal -->
-  <div class="modal" id="syncModal">
-    <div class="modal-header">
-      <h2>Cloud Sync & Backup (€0)</h2>
-      <button class="icon-btn" data-close-modal="syncModal">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-      </button>
-    </div>
-    <div class="modal-body">
-      <div class="help-box">
-        Collega un progetto gratuito su <strong>Supabase</strong> (tabella <code>study_state</code> via <code>supabase_setup.sql</code>) per sincronizzare automaticamente PC, iPad e iPhone. Puoi salvare le credenziali qui o direttamente in <code>config.js</code> prima del push su GitHub Pages.
-      </div>
-      <div class="field">
-        <label>Supabase Project URL</label>
-        <input type="url" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" />
-      </div>
-      <div class="field">
-        <label>Supabase Anon Public Key</label>
-        <input type="password" id="sbKey" placeholder="eyJhbGciOi..." />
-      </div>
-      <div class="field">
-        <label>Chiave Sync Personale (SYNC_KEY)</label>
-        <input type="text" id="sbSyncKey" placeholder="matteo-polimi-2026" />
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" id="saveSyncBtn">Salva e Sincronizza</button>
-        <button class="btn" id="forcePullBtn">Scarica dal Cloud</button>
-        <button class="btn" id="forcePushBtn">Invia al Cloud</button>
-      </div>
-      <hr style="border:none;border-top:1px solid var(--border)" />
-      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
-        <span style="font-size:12px;color:var(--text-secondary)">Backup manuale JSON</span>
-        <div style="display:flex;gap:8px">
-          <button class="btn" id="exportJsonBtn">Esporta</button>
-          <label class="btn" style="cursor:pointer">
-            Importa
-            <input type="file" id="importJsonInput" accept="application/json" hidden />
-          </label>
-        </div>
+      <div id="timetableGrid" class="p-4 sm:p-5 overflow-y-auto grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
+        <!-- Populated by JS -->
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+  <!-- ===================================================================== -->
+  <!-- MODAL: ADD LESSON                                                     -->
+  <!-- ===================================================================== -->
+  <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
+        <h2 class="text-[15px] font-semibold tracking-tight">Nuova lezione da recuperare</h2>
+        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Materia</label>
+            <select id="addCourse" onchange="onAddCourseChange()"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none"></select>
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Tipo</label>
+            <select id="addType"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none">
+              <option value="Lezione">Lezione</option>
+              <option value="Esercitazione">Esercitazione</option>
+              <option value="Laboratorio">Laboratorio</option>
+            </select>
+          </div>
+        </div>
 
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Data originale</label>
+            <input id="addDate" type="date"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Durata effettiva (min)</label>
+            <input id="addDuration" type="number" min="15" max="360" step="15" value="90"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+          </div>
+        </div>
+
+        <!-- Quick Effective Duration Chips -->
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.getElementById('addDuration').value=90"
+            class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11.5px] font-medium transition">
+            Slot 2h · 1h 30m (90m)
+          </button>
+          <button type="button" onclick="document.getElementById('addDuration').value=135"
+            class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11.5px] font-medium transition">
+            Slot 3h · 2h 15m (135m)
+          </button>
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Argomento (opzionale)</label>
+          <input id="addTopic" type="text" placeholder="Es. Cache, Guide d'onda, Teorema di Stokes..."
+            class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
+        </div>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Link registrazione (opzionale)</label>
+          <input id="addUrl" type="url" placeholder="https://..."
+            class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
+        </div>
+      </div>
+      <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex justify-end gap-2">
+        <button onclick="closeAllOverlays()" class="px-3.5 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium">Annulla</button>
+        <button onclick="confirmAddLesson()" class="px-4 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium">Aggiungi</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: GOOGLE CALENDAR SCHEDULER                                      -->
+  <!-- ===================================================================== -->
+  <div id="calModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
+        <h2 class="text-[15px] font-semibold tracking-tight">Pianifica su Google Calendar</h2>
+        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4">
+        <div id="calLessonSummary" class="text-[13.5px] font-semibold"></div>
+        <div id="calQuickChips" class="flex flex-wrap gap-1.5"></div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Giorno</label>
+            <input id="calDate" type="date" onchange="updateCalInfo()"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Ora inizio</label>
+            <input id="calTime" type="time" value="15:00" onchange="updateCalInfo()"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+          </div>
+        </div>
+        <label class="flex items-center gap-2.5 text-[13px] cursor-pointer select-none">
+          <input id="calBuffer" type="checkbox" checked onchange="updateCalInfo()" class="w-4 h-4 rounded accent-[#111113] dark:accent-[#F4F4F5]" />
+          <span>Aggiungi +15 min di margine per appunti</span>
+        </label>
+        <div id="calDurationInfo" class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] font-mono tabular-nums"></div>
+      </div>
+      <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2">
+        <button onclick="downloadICS()" class="px-3.5 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] text-[12.5px] font-medium transition">
+          Scarica .ics
+        </button>
+        <button onclick="openGoogleCalendar()" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
+          <span>Apri Google Calendar</span>
+          <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13.5 6H5.25A2.25 2.25 0 003 8.25v10.5A2.25 2.25 0 005.25 21h10.5A2.25 2.25 0 0018 18.75V10.5m-10.5 6L21 3m0 0h-5.25M21 3v5.25"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: SMART PICK ("HO X MIN")                                        -->
+  <!-- ===================================================================== -->
+  <div id="smartModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
+        <div>
+          <h2 class="text-[15px] font-semibold tracking-tight">Ho X minuti liberi</h2>
+          <p class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93]">Calcolato a <span id="smartSpeedText" class="font-mono font-semibold">1.25x</span> sulle durate effettive</p>
+        </div>
+        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="flex items-center gap-2">
+          <input id="smartMinutes" type="number" value="90" min="30" max="360" step="15" oninput="renderSmartPick()"
+            class="w-24 px-3 py-1.5 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums font-semibold focus:outline-none" />
+          <div class="flex flex-wrap gap-1.5">
+            <button onclick="setSmartMins(60)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">60m</button>
+            <button onclick="setSmartMins(90)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">90m</button>
+            <button onclick="setSmartMins(120)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h</button>
+            <button onclick="setSmartMins(150)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h 30m</button>
+          </div>
+        </div>
+        <div id="smartResults" class="space-y-2"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- MODAL: CLOUD SYNC & BACKUP                                            -->
+  <!-- ===================================================================== -->
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-[88vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
+        <h2 class="text-[15px] font-semibold tracking-tight">Cloud Sync &amp; Backup</h2>
+        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+        </button>
+      </div>
+      <div class="p-5 space-y-4 overflow-y-auto">
+        <div class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] leading-relaxed">
+          Sincronizzazione automatica con Supabase (<span class="font-mono text-[11px]">public.study_state</span>). Le credenziali salvate qui restano solo sul dispositivo (<span class="font-mono text-[11px]">localStorage</span>).
+        </div>
+        <div class="space-y-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Supabase Project URL</label>
+            <input id="sbUrl" type="url" placeholder="https://xxxxxxxx.supabase.co"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Supabase Anon Public Key</label>
+            <input id="sbKey" type="password" placeholder="eyJhbGciOi..."
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
+          </div>
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Chiave Sync Personale (SYNC_KEY)</label>
+            <input id="sbSyncKey" type="text" placeholder="matteo-polimi-2026"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
+          </div>
+        </div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="saveAndSync()" class="px-3.5 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium">Salva e Sincronizza</button>
+          <button onclick="pullFromSupabase(false)" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Scarica</button>
+          <button onclick="pushToSupabase(false)" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Invia</button>
+        </div>
+
+        <div class="pt-4 border-t border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between gap-2">
+          <span class="text-[12px] font-medium text-[#71717A] dark:text-[#A1A1AA]">Backup manuale JSON</span>
+          <div class="flex items-center gap-2">
+            <button onclick="exportJSON()" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Esporta</button>
+            <label class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05] cursor-pointer">
+              Importa
+              <input id="importJsonInput" type="file" accept="application/json" onchange="importJSON(event)" class="hidden" />
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===================================================================== -->
+  <!-- TOAST NOTIFICATION                                                    -->
+  <!-- ===================================================================== -->
+  <div id="toast"
+    class="fixed bottom-5 right-5 z-[100] px-4 py-2.5 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium shadow-float opacity-0 translate-y-2 pointer-events-none transition-all duration-200"></div>
+
+  <!-- ===================================================================== -->
+  <!-- APPLICATION LOGIC                                                     -->
+  <!-- ===================================================================== -->
   <script>
+    // =========================================================================
+    // 1. CONSTANTS, POLIMI TIMETABLE & DEFAULT DATA (EFFECTIVE DURATIONS)
+    // =========================================================================
+    const STORAGE_KEY = 'recupero_lezioni_state_v2';
+    const SYNC_CFG_KEY = 'recupero_lezioni_sync_cfg_v1';
+
     const STAGES = [
       { id: 0, label: 'Da vedere' },
       { id: 1, label: 'Vista' },
@@ -943,92 +566,132 @@
       { id: 3, label: 'Completata' }
     ];
 
+    const SPEED_OPTIONS = [1, 1.25, 1.5, 1.75, 2];
+
+    // Exact PoliMi weekly timetable: 2h slot -> 90m effective, 3h slot -> 135m effective
     const COURSES = [
       {
         id: 'ACSO',
         name: 'ACSO',
         fullName: 'Architettura dei Calcolatori e Sistemi Operativi',
-        color: '#EAB308',
+        color: '#D97706',
+        tint: 'rgba(217, 119, 6, 0.12)',
+        defaultDuration: 135,
         schedule: [
-          { dow: 2, duration: 180, type: 'Lezione' },
-          { dow: 4, duration: 180, type: 'Lezione' },
-          { dow: 5, duration: 180, type: 'Lezione' }
+          { dow: 2, start: '08:15', end: '11:15', room: 'B.4.4', slotHours: 3, duration: 135, type: 'Lezione' },
+          { dow: 4, start: '10:15', end: '13:15', room: '7.1.3', slotHours: 3, duration: 135, type: 'Lezione' },
+          { dow: 5, start: '08:15', end: '11:15', room: '5.03',  slotHours: 3, duration: 135, type: 'Lezione' }
         ]
       },
       {
         id: 'ONDE',
         name: 'ONDE',
         fullName: 'Onde Elettromagnetiche e Mezzi Trasmissivi',
-        color: '#F97316',
+        color: '#EA580C',
+        tint: 'rgba(234, 88, 12, 0.12)',
+        defaultDuration: 90,
         schedule: [
-          { dow: 3, duration: 120, type: 'Lezione' },
-          { dow: 4, duration: 120, type: 'Lezione' }
+          { dow: 3, start: '14:15', end: '16:15', room: '8.1.1', slotHours: 2, duration: 90, type: 'Lezione' },
+          { dow: 4, start: '08:15', end: '10:15', room: 'B.2.4', slotHours: 2, duration: 90, type: 'Lezione' }
         ]
       },
       {
         id: 'LEA',
         name: 'LEA',
         fullName: 'Logica e Algebra',
-        color: '#EC4899',
+        color: '#DB2777',
+        tint: 'rgba(219, 39, 119, 0.12)',
+        defaultDuration: 90,
         schedule: [
-          { dow: 2, duration: 120, type: 'Lezione' },
-          { dow: 5, duration: 120, type: 'Esercitazione' }
+          { dow: 2, start: '14:15', end: '16:15', room: '25.S.3', slotHours: 2, duration: 90, type: 'Lezione' },
+          { dow: 5, start: '14:15', end: '16:15', room: '9.0.1',  slotHours: 2, duration: 90, type: 'Esercitazione' }
         ]
       },
       {
         id: 'ANALISI2',
         name: 'ANALISI II',
         fullName: 'Analisi Matematica 2',
-        color: '#22C55E',
+        color: '#16A34A',
+        tint: 'rgba(22, 163, 74, 0.12)',
+        defaultDuration: 135,
         schedule: [
-          { dow: 2, duration: 120, type: 'Lezione' },
-          { dow: 4, duration: 180, type: 'Lezione' },
-          { dow: 5, duration: 180, type: 'Lezione' }
+          { dow: 2, start: '11:15', end: '13:15', room: 'B.4.4', slotHours: 2, duration: 90,  type: 'Lezione' },
+          { dow: 4, start: '14:15', end: '17:15', room: 'T.2.3', slotHours: 3, duration: 135, type: 'Lezione' },
+          { dow: 5, start: '16:15', end: '19:15', room: '3.1.2', slotHours: 3, duration: 135, type: 'Lezione' }
         ]
       }
     ];
 
     const DEFAULT_LESSONS = [
-      { id: 'acso-2026-11-19', courseId: 'ACSO', date: '2026-11-19', type: 'Lezione', duration: 180, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'onde-2026-11-11', courseId: 'ONDE', date: '2026-11-11', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'onde-2026-11-12', courseId: 'ONDE', date: '2026-11-12', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'onde-2026-11-18', courseId: 'ONDE', date: '2026-11-18', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'onde-2026-11-19', courseId: 'ONDE', date: '2026-11-19', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-10-10', courseId: 'LEA', date: '2026-10-10', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-10-16', courseId: 'LEA', date: '2026-10-16', type: 'Esercitazione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-10-23', courseId: 'LEA', date: '2026-10-23', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-10-27', courseId: 'LEA', date: '2026-10-27', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-03', courseId: 'LEA', date: '2026-11-03', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-06', courseId: 'LEA', date: '2026-11-06', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-10', courseId: 'LEA', date: '2026-11-10', type: 'Lezione', duration: 120, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-13', courseId: 'LEA', date: '2026-11-13', type: 'Esercitazione', duration: 120, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-17', courseId: 'LEA', date: '2026-11-17', type: 'Lezione', duration: 120, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' },
-      { id: 'lea-2026-11-20', courseId: 'LEA', date: '2026-11-20', type: 'Esercitazione', duration: 120, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' }
+      // ACSO (3h slot -> 135 min effective)
+      { id: 'acso-2026-11-19', courseId: 'ACSO', date: '2026-11-19', type: 'Lezione', duration: 135, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+
+      // ONDE (2h slot -> 90 min effective)
+      { id: 'onde-2026-11-11', courseId: 'ONDE', date: '2026-11-11', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-12', courseId: 'ONDE', date: '2026-11-12', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-18', courseId: 'ONDE', date: '2026-11-18', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-19', courseId: 'ONDE', date: '2026-11-19', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+
+      // LEA (2h slot -> 90 min effective)
+      { id: 'lea-2026-10-10', courseId: 'LEA', date: '2026-10-10', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-16', courseId: 'LEA', date: '2026-10-16', type: 'Esercitazione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-23', courseId: 'LEA', date: '2026-10-23', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-27', courseId: 'LEA', date: '2026-10-27', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-03', courseId: 'LEA', date: '2026-11-03', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-06', courseId: 'LEA', date: '2026-11-06', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-10', courseId: 'LEA', date: '2026-11-10', type: 'Lezione', duration: 90, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-13', courseId: 'LEA', date: '2026-11-13', type: 'Esercitazione', duration: 90, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-17', courseId: 'LEA', date: '2026-11-17', type: 'Lezione', duration: 90, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-20', courseId: 'LEA', date: '2026-11-20', type: 'Esercitazione', duration: 90, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' }
     ];
 
-    const STORAGE_KEY = 'recupero_lezioni_state_v2';
-    const SYNC_CFG_KEY = 'recupero_lezioni_sync_cfg_v1';
-
+    // =========================================================================
+    // 2. STATE, MIGRATION & SUPABASE SYNC
+    // =========================================================================
     let state = loadState();
     let ui = {
       view: 'all',
       filter: 'open',
       search: '',
       activeLessonId: null,
-      calLessonId: null
+      calLessonId: null,
+      deleteArmed: false
     };
     let syncTimer = null;
+    let toastTimer = null;
+
+    function migrateEffectiveDurations(targetState) {
+      if (!targetState || !Array.isArray(targetState.lessons)) return false;
+      if (targetState.effectiveDurationMigrated) return false;
+      targetState.lessons.forEach(l => {
+        if (l.duration === 180) l.duration = 135;
+        else if (l.duration === 120) l.duration = 90;
+      });
+      targetState.effectiveDurationMigrated = true;
+      return true;
+    }
 
     function loadState() {
       try {
         const raw = localStorage.getItem(STORAGE_KEY);
-        if (raw) return JSON.parse(raw);
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed && Array.isArray(parsed.lessons)) {
+            const migrated = migrateEffectiveDurations(parsed);
+            if (migrated) {
+              parsed.updatedAt = new Date().toISOString();
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(parsed));
+            }
+            return parsed;
+          }
+        }
       } catch (e) {}
       return {
-        lessons: DEFAULT_LESSONS,
+        lessons: DEFAULT_LESSONS.map(x => ({ ...x })),
         speed: 1.25,
-        dailyHours: 2,
+        dailyHours: 2.0,
         theme: 'light',
+        effectiveDurationMigrated: true,
         updatedAt: new Date().toISOString()
       };
     }
@@ -1046,7 +709,9 @@
 
     function saveState(skipCloud = false) {
       state.updatedAt = new Date().toISOString();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      } catch (e) {}
       render();
       if (!skipCloud) scheduleCloudPush();
     }
@@ -1062,7 +727,13 @@
     function setSyncUI(status, text) {
       const dot = document.getElementById('syncDot');
       const label = document.getElementById('syncLabel');
-      dot.className = 'sync-dot ' + (status || '');
+      const colors = {
+        ok: 'bg-emerald-500',
+        busy: 'bg-amber-500 animate-pulse',
+        err: 'bg-red-500',
+        '': 'bg-[#A1A1AA]'
+      };
+      dot.className = `w-2 h-2 rounded-full shrink-0 ${colors[status] || colors['']}`;
       label.textContent = text;
     }
 
@@ -1094,7 +765,7 @@
       } catch (err) {
         console.error(err);
         setSyncUI('err', 'Errore sync');
-        if (!silent) toast('Errore sync: controlla credenziali o SQL');
+        if (!silent) toast('Errore sync: controlla credenziali o permessi');
       }
     }
 
@@ -1119,14 +790,32 @@
           return;
         }
         const remote = rows[0].payload;
-        if (remote && (!state.updatedAt || new Date(remote.updatedAt) > new Date(state.updatedAt))) {
-          state = remote;
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-          applyTheme();
-          render();
-          if (!silent) toast('Aggiornato dal cloud');
-        } else if (!silent) {
-          toast('Già aggiornato');
+        if (remote && Array.isArray(remote.lessons)) {
+          const remoteIsNewer = !state.updatedAt || new Date(remote.updatedAt) > new Date(state.updatedAt);
+          if (remoteIsNewer) {
+            state = remote;
+            const migrated = migrateEffectiveDurations(state);
+            if (migrated) {
+              state.updatedAt = new Date().toISOString();
+              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+              applyTheme();
+              render();
+              await pushToSupabase(true);
+              if (!silent) toast('Aggiornato e convertito alle durate effettive');
+              return;
+            }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            applyTheme();
+            render();
+            if (!silent) toast('Aggiornato dal cloud');
+          } else {
+            // Local might have just migrated durations
+            if (!remote.effectiveDurationMigrated && state.effectiveDurationMigrated) {
+              await pushToSupabase(true);
+            } else if (!silent) {
+              toast('Già aggiornato');
+            }
+          }
         }
         setSyncUI('ok', 'Sincronizzato');
       } catch (err) {
@@ -1136,50 +825,109 @@
       }
     }
 
-    // Helpers
-    function getCourse(id) { return COURSES.find(c => c.id === id) || COURSES[0]; }
-    function effMinutes(mins) { return Math.round(mins / (state.speed || 1.25)); }
-    function formatHours(mins) {
-      const h = Math.floor(mins / 60);
-      const m = mins % 60;
-      if (h === 0) return `${m}m`;
-      return m === 0 ? `${h}h` : `${h}h ${m}m`;
+    // =========================================================================
+    // 3. HELPERS & FORMATTERS
+    // =========================================================================
+    function getCourse(id) {
+      return COURSES.find(c => c.id === id) || COURSES[0];
     }
-    function formatDateIT(iso) {
+
+    function effMinutes(baseMins) {
+      return Math.round((Number(baseMins) || 90) / (Number(state.speed) || 1.25));
+    }
+
+    function formatHours(mins) {
+      const m = Math.max(0, Math.round(mins));
+      const h = Math.floor(m / 60);
+      const r = m % 60;
+      if (h === 0) return `${r}m`;
+      return r === 0 ? `${h}h` : `${h}h ${String(r).padStart(2, '0')}m`;
+    }
+
+    function formatDateReadable(iso) {
       if (!iso) return '—';
-      const [y, m, d] = iso.split('-');
+      const [y, m, d] = iso.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      const days = ['dom', 'lun', 'mar', 'mer', 'gio', 'ven', 'sab'];
+      const months = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+      return `${days[dt.getDay()]} ${String(d).padStart(2, '0')} ${months[m - 1]}`;
+    }
+
+    function formatDateShort(iso) {
+      if (!iso) return '—';
+      const [, m, d] = iso.split('-');
       return `${d}/${m}`;
     }
+
     function formatScheduled(str) {
       if (!str) return '';
       const [date, time] = str.split('T');
-      return `${formatDateIT(date)} ${time || ''}`.trim();
+      return `${formatDateShort(date)} ${time || ''}`.trim();
     }
+
+    function toIsoDate(d) {
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function escapeHtml(str) {
+      return String(str || '').replace(/[&<>"']/g, s => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[s]));
+    }
+
     function toast(msg) {
       const el = document.getElementById('toast');
       el.textContent = msg;
-      el.classList.add('show');
-      setTimeout(() => el.classList.remove('show'), 2400);
-    }
-    function applyTheme() {
-      document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
-      const btn = document.getElementById('themeBtn');
-      btn.innerHTML = state.theme === 'dark'
-        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
-        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+      el.classList.remove('opacity-0', 'translate-y-2');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => {
+        el.classList.add('opacity-0', 'translate-y-2');
+      }, 2600);
     }
 
-    function stageIcon(stage) {
-      if (stage === 0) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
-      if (stage === 1) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="#D97706"/></svg>';
-      if (stage === 2) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 1-9 9h9z" fill="#2563EB"/></svg>';
-      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2"><circle cx="12" cy="12" r="9" fill="#059669" stroke="#059669"/><polyline points="8.5 12.5 11 15 16 9.5" stroke="#fff"/></svg>';
+    function applyTheme() {
+      const isDark = state.theme === 'dark';
+      document.documentElement.classList.toggle('dark', isDark);
+      document.getElementById('themeColorMeta').setAttribute('content', isDark ? '#0B0B0E' : '#F6F6F4');
+      document.getElementById('themeBtn').innerHTML = isDark
+        ? '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z"/></svg>'
+        : '<svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z"/></svg>';
+    }
+
+    function stageRingSVG(stage) {
+      if (stage === 0) {
+        return `<svg class="w-[18px] h-[18px] text-[#A1A1AA] dark:text-[#52525B]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+          <circle cx="12" cy="12" r="8.5" stroke-dasharray="3.2 2.5" />
+        </svg>`;
+      }
+      if (stage === 1) {
+        return `<svg class="w-[18px] h-[18px] text-[#D97706]" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.75" />
+          <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="currentColor" />
+        </svg>`;
+      }
+      if (stage === 2) {
+        return `<svg class="w-[18px] h-[18px] text-[#2563EB]" viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.75" />
+          <path d="M12 3.5A8.5 8.5 0 1 1 3.5 12H12V3.5Z" fill="currentColor" />
+        </svg>`;
+      }
+      return `<svg class="w-[18px] h-[18px] text-[#16A34A]" viewBox="0 0 24 24" fill="none">
+        <circle cx="12" cy="12" r="8.5" fill="currentColor" />
+        <path d="M8.5 12.2l2.3 2.3 4.7-4.8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>`;
+    }
+
+    // =========================================================================
+    // 4. RENDER ENGINE
+    // =========================================================================
+    function getScopedLessons() {
+      if (ui.view === 'all' || ui.view === 'scheduled') return state.lessons;
+      return state.lessons.filter(l => l.courseId === ui.view);
     }
 
     function getFilteredLessons() {
       return state.lessons
         .filter(l => {
-          if (ui.view === 'scheduled') return !!l.scheduled && l.stage < 3;
+          if (ui.view === 'scheduled') return Boolean(l.scheduled) && l.stage < 3;
           if (ui.view !== 'all' && l.courseId !== ui.view) return false;
           return true;
         })
@@ -1193,7 +941,8 @@
           const q = ui.search.toLowerCase();
           return (
             l.date.includes(q) ||
-            formatDateIT(l.date).includes(q) ||
+            formatDateShort(l.date).includes(q) ||
+            formatDateReadable(l.date).includes(q) ||
             (l.topic || '').toLowerCase().includes(q) ||
             (l.notes || '').toLowerCase().includes(q) ||
             l.courseId.toLowerCase().includes(q) ||
@@ -1204,175 +953,443 @@
     }
 
     function render() {
-      document.getElementById('speedSelect').value = String(state.speed);
-      document.getElementById('dailyHoursInput').value = state.dailyHours;
+      renderSidebar();
+      renderHeaderAndKPIs();
+      renderCourseOverview();
+      renderAnalisiBanner();
+      renderFilterTabs();
+      renderLessonList();
+    }
 
-      // Sidebar counts
+    function renderSidebar() {
       const openAll = state.lessons.filter(l => l.stage < 3);
       document.getElementById('cnt-all').textContent = openAll.length;
       document.getElementById('cnt-scheduled').textContent = openAll.filter(l => l.scheduled).length;
 
-      const courseNav = document.getElementById('courseNav');
-      courseNav.innerHTML = COURSES.map(c => {
+      const styleNav = (id, active) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.className = active
+          ? 'w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] font-semibold bg-black/[0.06] dark:bg-white/[0.09] text-[#111113] dark:text-white transition'
+          : 'w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] font-medium text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.035] dark:hover:bg-white/[0.05] hover:text-[#111113] dark:hover:text-white transition';
+      };
+
+      styleNav('nav-all', ui.view === 'all');
+      styleNav('nav-scheduled', ui.view === 'scheduled');
+
+      document.getElementById('courseNav').innerHTML = COURSES.map(c => {
         const cnt = openAll.filter(l => l.courseId === c.id).length;
+        const active = ui.view === c.id;
         return `
-          <button class="nav-item ${ui.view === c.id ? 'active' : ''}" data-view="${c.id}">
-            <span class="nav-left">
-              <span class="dot" style="background:${c.color}"></span>
-              <span>${c.name}</span>
+          <button onclick="setView('${c.id}')"
+            class="w-full flex items-center justify-between px-2.5 py-2 rounded-lg text-[13px] transition ${
+              active
+                ? 'font-semibold bg-black/[0.06] dark:bg-white/[0.09] text-[#111113] dark:text-white'
+                : 'font-medium text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.035] dark:hover:bg-white/[0.05] hover:text-[#111113] dark:hover:text-white'
+            }">
+            <span class="flex items-center gap-2.5 min-w-0">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+              <span class="truncate">${c.name}</span>
             </span>
-            <span class="count">${cnt}</span>
+            <span class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">${cnt}</span>
           </button>
         `;
       }).join('');
 
-      document.querySelectorAll('.nav-item').forEach(btn => {
-        btn.classList.toggle('active', btn.dataset.view === ui.view);
-        btn.onclick = () => {
-          ui.view = btn.dataset.view;
-          closeMobileSidebar();
-          render();
-        };
-      });
+      // Speed pills
+      document.getElementById('speedIndicator').textContent = `${state.speed}x`;
+      document.getElementById('speedPills').innerHTML = SPEED_OPTIONS.map(sp => {
+        const active = Number(state.speed) === sp;
+        return `<button onclick="setSpeed(${sp})"
+          class="py-1 rounded-md font-mono text-[11px] tabular-nums font-medium transition ${
+            active
+              ? 'bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm'
+              : 'text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white'
+          }">${sp}x</button>`;
+      }).join('');
 
-      // Title
-      const titleEl = document.getElementById('viewTitle');
-      if (ui.view === 'all') titleEl.textContent = 'Tutte le lezioni';
-      else if (ui.view === 'scheduled') titleEl.textContent = 'Pianificate su Calendar';
-      else titleEl.textContent = getCourse(ui.view).fullName;
+      document.getElementById('dailyHoursLabel').textContent = `${Number(state.dailyHours).toFixed(1)}h`;
+    }
 
-      // Metrics
-      const scopeLessons = ui.view === 'all' || ui.view === 'scheduled'
-        ? state.lessons
-        : state.lessons.filter(l => l.courseId === ui.view);
+    function renderHeaderAndKPIs() {
+      const scopeLessons = getScopedLessons();
       const scopeOpen = scopeLessons.filter(l => l.stage < 3);
       const scopeDone = scopeLessons.filter(l => l.stage === 3);
-      const rawMins = scopeOpen.reduce((s, l) => s + (l.duration || 120), 0);
-      const realMins = scopeOpen.reduce((s, l) => s + effMinutes(l.duration || 120), 0);
-      const daysNeeded = realMins > 0 ? Math.ceil((realMins / 60) / (state.dailyHours || 2)) : 0;
+
+      const baseMins = scopeOpen.reduce((s, l) => s + (l.duration || 90), 0);
+      const adjMins = scopeOpen.reduce((s, l) => s + effMinutes(l.duration || 90), 0);
+      const dailyHrs = Number(state.dailyHours) || 2;
+      const daysNeeded = adjMins > 0 ? Math.ceil((adjMins / 60) / dailyHrs) : 0;
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() + daysNeeded);
-      const targetStr = daysNeeded === 0 ? 'In pari' : targetDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+      const targetStr = daysNeeded === 0
+        ? 'In pari'
+        : targetDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
 
-      document.getElementById('metrics').innerHTML = `
-        <div class="metric-card">
-          <div class="metric-label">Arretrate</div>
-          <div class="metric-value">${scopeOpen.length}</div>
-          <div class="metric-sub">${scopeDone.length} completate</div>
+      // Header title & subtitle
+      const dot = document.getElementById('viewHeaderDot');
+      const title = document.getElementById('viewTitle');
+      const sub = document.getElementById('viewSubtitle');
+
+      if (ui.view === 'all') {
+        dot.classList.add('hidden');
+        title.textContent = 'Tutte le lezioni';
+        sub.textContent = `${formatHours(adjMins)} a ${state.speed}x · pareggio ${targetStr}`;
+      } else if (ui.view === 'scheduled') {
+        dot.classList.add('hidden');
+        title.textContent = 'Pianificate su Calendar';
+        const schedCnt = scopeOpen.filter(l => l.scheduled).length;
+        sub.textContent = `${schedCnt} sessioni in calendario`;
+      } else {
+        const c = getCourse(ui.view);
+        dot.classList.remove('hidden');
+        dot.style.background = c.color;
+        title.textContent = c.fullName;
+        sub.textContent = `${scopeOpen.length} aperte · ${formatHours(adjMins)} a ${state.speed}x`;
+      }
+
+      // KPI Cards
+      const scheduledOpen = scopeOpen.filter(l => l.scheduled).length;
+      document.getElementById('kpiGrid').innerHTML = `
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
+          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Arretrate</div>
+          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${scopeOpen.length}</div>
+          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${scopeDone.length} completate</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Ore effettive (${state.speed}x)</div>
-          <div class="metric-value">${formatHours(realMins)}</div>
-          <div class="metric-sub">${formatHours(rawMins)} reali a 1x</div>
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
+          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Tempo effettivo (${state.speed}x)</div>
+          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${formatHours(adjMins)}</div>
+          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${formatHours(baseMins)} a 1x</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Pareggio stimato</div>
-          <div class="metric-value">${targetStr}</div>
-          <div class="metric-sub">${daysNeeded} gg a ${state.dailyHours}h/giorno</div>
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
+          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Pareggio stimato</div>
+          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${targetStr}</div>
+          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${daysNeeded} gg a ${dailyHrs.toFixed(1)}h/g</div>
         </div>
-        <div class="metric-card">
-          <div class="metric-label">Pianificate</div>
-          <div class="metric-value">${scopeOpen.filter(l => l.scheduled).length}</div>
-          <div class="metric-sub">su ${scopeOpen.length} aperte</div>
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
+          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Pianificate</div>
+          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${scheduledOpen}</div>
+          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">su ${scopeOpen.length} aperte</div>
         </div>
       `;
 
-      // Analisi II special banner
-      const bannerEl = document.getElementById('specialBanner');
+      // Overall Completion Bar
+      const total = scopeLessons.length;
+      const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / 3), 0);
+      const pct = total === 0 ? 100 : Math.round((weightedDone / total) * 100);
+      document.getElementById('overallPctText').textContent = `${pct}% (${scopeDone.length}/${total})`;
+      document.getElementById('overallProgressBar').style.width = `${pct}%`;
+    }
+
+    function renderCourseOverview() {
+      const sec = document.getElementById('courseOverviewSection');
+      if (ui.view !== 'all') {
+        sec.classList.add('hidden');
+        return;
+      }
+      sec.classList.remove('hidden');
+
+      document.getElementById('courseOverviewGrid').innerHTML = COURSES.map(c => {
+        const all = state.lessons.filter(l => l.courseId === c.id);
+        const open = all.filter(l => l.stage < 3);
+        const done = all.filter(l => l.stage === 3);
+        const adjMins = open.reduce((s, l) => s + effMinutes(l.duration || c.defaultDuration), 0);
+        const pct = all.length === 0 ? 0 : Math.round((done.length / all.length) * 100);
+        const isAnalisiPending = c.id === 'ANALISI2' && all.length === 0;
+
+        return `
+          <button onclick="setView('${c.id}')"
+            class="text-left bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] hover:border-black/[0.18] dark:hover:border-white/[0.18] rounded-xl p-3.5 shadow-card transition group">
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex items-center gap-2 min-w-0">
+                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${c.color}"></span>
+                <span class="text-[13px] font-semibold tracking-tight truncate">${c.name}</span>
+              </span>
+              <span class="font-mono text-[11px] tabular-nums text-[#71717A] dark:text-[#8E8E93]">
+                ${isAnalisiPending ? 'dal 06/10' : `${open.length} aperte`}
+              </span>
+            </div>
+            <div class="mt-2.5 flex items-baseline justify-between">
+              <span class="font-mono text-[15px] font-semibold tabular-nums">
+                ${isAnalisiPending ? 'Da pianificare' : formatHours(adjMins)}
+              </span>
+              <span class="font-mono text-[10.5px] tabular-nums text-[#8E8E93]">${all.length > 0 ? `${pct}%` : ''}</span>
+            </div>
+            <div class="mt-2 h-1 w-full rounded-full bg-black/[0.05] dark:bg-white/[0.07] overflow-hidden">
+              <div class="h-full rounded-full transition-all duration-300" style="width:${isAnalisiPending ? 0 : (all.length ? Math.max(pct, 6) : 100)}%; background:${c.color}"></div>
+            </div>
+          </button>
+        `;
+      }).join('');
+    }
+
+    function renderAnalisiBanner() {
+      const sec = document.getElementById('analisiBannerSection');
       const analisiCount = state.lessons.filter(l => l.courseId === 'ANALISI2').length;
       if (ui.view === 'ANALISI2' && analisiCount === 0) {
-        bannerEl.innerHTML = `
-          <div class="banner">
-            <div class="banner-text">
-              <h3>Analisi Matematica 2 — fermo al 06/10</h3>
-              <p>Puoi generare automaticamente tutte le lezioni dall'orario PoliMi (Mar 2h, Gio 3h, Ven 3h) dal 08/10 a oggi in un click, oppure aggiungerle manualmente.</p>
+        sec.classList.remove('hidden');
+        sec.innerHTML = `
+          <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span>
+                <h3 class="text-[14px] font-semibold">Analisi Matematica 2 — fermo al 06/10</h3>
+              </div>
+              <p class="text-[12.5px] text-[#52525B] dark:text-[#A1A1AA]">
+                Puoi generare tutte le lezioni dal 08/10 ad oggi usando l'orario PoliMi con durate effettive (Mar 1h 30m, Gio 2h 15m, Ven 2h 15m).
+              </p>
             </div>
-            <button class="btn btn-primary" id="genAnalisiBtn">Genera da orario</button>
+            <button onclick="generateAnalisiBacklog()"
+              class="shrink-0 inline-flex items-center justify-center gap-1.5 px-4 py-2 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
+              Genera dal 08/10 ad oggi
+            </button>
           </div>
         `;
-        document.getElementById('genAnalisiBtn').onclick = generateAnalisiBacklog;
       } else {
-        bannerEl.innerHTML = '';
+        sec.classList.add('hidden');
+        sec.innerHTML = '';
       }
+    }
 
-      // List
-      const list = getFilteredLessons();
-      const listEl = document.getElementById('lessonList');
-      if (list.length === 0) {
-        listEl.innerHTML = `<div class="empty-state">Nessuna lezione in questa vista.</div>`;
+    function renderFilterTabs() {
+      document.querySelectorAll('#stageFilter button').forEach(btn => {
+        const active = btn.dataset.filter === ui.filter;
+        btn.className = active
+          ? 'px-3 py-1.5 rounded-lg text-[12.5px] font-semibold bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm transition'
+          : 'px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white transition';
+      });
+    }
+
+    function renderLessonList() {
+      const container = document.getElementById('lessonList');
+      const items = getFilteredLessons();
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="px-6 py-14 text-center text-[13px] text-[#71717A] dark:text-[#8E8E93]">
+            Nessuna lezione in questa vista.
+          </div>
+        `;
         return;
       }
 
-      listEl.innerHTML = list.map(l => {
+      container.innerHTML = items.map(l => {
         const c = getCourse(l.courseId);
-        const eff = effMinutes(l.duration || 120);
+        const baseMin = l.duration || c.defaultDuration;
+        const effMin = effMinutes(baseMin);
+        const isDone = l.stage === 3;
+
         return `
-          <div class="lesson-row ${l.stage === 3 ? 'done' : ''}" data-id="${l.id}">
-            <button class="status-btn" data-cycle="${l.id}" title="Avanza stato (${STAGES[l.stage].label})">
-              ${stageIcon(l.stage)}
-            </button>
-            <div class="course-tag">
-              <span class="dot" style="background:${c.color}"></span>
-              <span>${c.name}</span>
-            </div>
-            <div class="lesson-main">
-              <div class="lesson-title-line">
-                <span class="lesson-date">${formatDateIT(l.date)}</span>
-                <span class="pill">${l.type}</span>
-                ${l.scheduled ? `<span class="pill cal">Cal: ${formatScheduled(l.scheduled)}</span>` : ''}
-                ${l.topic ? `<span class="lesson-topic">${escapeHtml(l.topic)}</span>` : ''}
+          <div onclick="openDrawer('${l.id}')"
+            class="group px-3.5 sm:px-5 py-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-porcelain/70 dark:hover:bg-cardDarkHover transition ${isDone ? 'opacity-55' : ''}">
+
+            <!-- Left: Ring + Course Pill + Date + Type + Topic -->
+            <div class="flex items-center gap-3 min-w-0 flex-1">
+              <button onclick="cycleStage(event, '${l.id}')" title="Stato: ${STAGES[l.stage].label} (clicca per avanzare)"
+                class="w-7 h-7 -ml-1 rounded-lg flex items-center justify-center hover:bg-black/[0.05] dark:hover:bg-white/[0.07] shrink-0 transition">
+                ${stageRingSVG(l.stage)}
+              </button>
+
+              <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold shrink-0"
+                style="background:${c.tint}; color:${c.color}">
+                <span class="w-1.5 h-1.5 rounded-full" style="background:${c.color}"></span>
+                ${c.name}
+              </span>
+
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="sm:hidden w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+                  <span class="font-mono text-[12.5px] font-semibold tabular-nums">${formatDateReadable(l.date)}</span>
+                  <span class="px-2 py-0.5 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian text-[11px] text-[#52525B] dark:text-[#A1A1AA]">${escapeHtml(l.type)}</span>
+                  ${l.scheduled ? `
+                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono text-[11px] tabular-nums font-medium">
+                      Cal: ${formatScheduled(l.scheduled)}
+                    </span>` : ''}
+                  ${l.topic ? `<span class="text-[13px] text-[#52525B] dark:text-[#A1A1AA] truncate max-w-[260px] sm:max-w-[340px]">${escapeHtml(l.topic)}</span>` : ''}
+                </div>
               </div>
             </div>
-            <div class="lesson-meta">
-              <span>${formatHours(eff)}</span>
-              <span class="stage-label">${STAGES[l.stage].label}</span>
-            </div>
-            <div class="row-actions">
-              <button class="icon-btn" data-cal="${l.id}" title="Aggiungi a Google Calendar">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
-              </button>
+
+            <!-- Right: Effective Duration + Stage + Quick Actions -->
+            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
+              <div class="hidden md:flex flex-col items-end" title="Durata effettiva a 1x: ${formatHours(baseMin)}">
+                <span class="font-mono text-[12px] font-semibold tabular-nums">${formatHours(effMin)}</span>
+                <span class="text-[10.5px] text-[#8E8E93]">${STAGES[l.stage].label}</span>
+              </div>
+
+              <div class="flex items-center gap-1">
+                ${l.url ? `
+                  <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Apri registrazione"
+                    class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#111113] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
+                    </svg>
+                  </a>` : ''}
+
+                <button onclick="openCalModal(event, '${l.id}')" title="Pianifica su Google Calendar"
+                  class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#111113] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
+                  <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         `;
       }).join('');
+    }
 
-      listEl.querySelectorAll('.lesson-row').forEach(row => {
-        row.onclick = (e) => {
-          if (e.target.closest('[data-cycle]') || e.target.closest('[data-cal]')) return;
-          openDrawer(row.dataset.id);
-        };
+    // =========================================================================
+    // 5. INTERACTIONS & NAVIGATION
+    // =========================================================================
+    function setView(view) {
+      ui.view = view;
+      closeMobileSidebar();
+      render();
+    }
+
+    function setFilter(filter) {
+      ui.filter = filter;
+      render();
+    }
+
+    function setSpeed(sp) {
+      state.speed = sp;
+      saveState();
+    }
+
+    function stepDailyHours(delta) {
+      const next = Math.max(0.5, Math.min(10, (Number(state.dailyHours) || 2) + delta));
+      state.dailyHours = Math.round(next * 10) / 10;
+      saveState();
+    }
+
+    function toggleTheme() {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+    }
+
+    function cycleStage(ev, id) {
+      ev.stopPropagation();
+      const l = state.lessons.find(x => x.id === id);
+      if (!l) return;
+      l.stage = (l.stage + 1) % 4;
+      saveState();
+      toast(`Stato: ${STAGES[l.stage].label}`);
+    }
+
+    function openMobileSidebar() {
+      document.getElementById('sidebar').classList.remove('-translate-x-full');
+      document.getElementById('overlay').classList.remove('hidden');
+    }
+
+    function closeMobileSidebar() {
+      document.getElementById('sidebar').classList.add('-translate-x-full');
+    }
+
+    function closeAllOverlays() {
+      document.getElementById('overlay').classList.add('hidden');
+      document.getElementById('drawer').classList.add('translate-x-full');
+      ['timetableModal', 'addModal', 'calModal', 'smartModal', 'syncModal'].forEach(id => {
+        const el = document.getElementById(id);
+        el.classList.add('hidden');
+        el.classList.remove('flex');
       });
-      listEl.querySelectorAll('[data-cycle]').forEach(btn => {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          const lesson = state.lessons.find(x => x.id === btn.dataset.cycle);
-          if (!lesson) return;
-          lesson.stage = (lesson.stage + 1) % 4;
-          saveState();
-        };
-      });
-      listEl.querySelectorAll('[data-cal]').forEach(btn => {
-        btn.onclick = (e) => {
-          e.stopPropagation();
-          openCalModal(btn.dataset.cal);
-        };
+      closeMobileSidebar();
+      ui.deleteArmed = false;
+    }
+
+    function openModal(id) {
+      closeAllOverlays();
+      document.getElementById('overlay').classList.remove('hidden');
+      const el = document.getElementById(id);
+      el.classList.remove('hidden');
+      el.classList.add('flex');
+    }
+
+    // =========================================================================
+    // 6. INTERACTIVE POLIMI TIMETABLE MODAL
+    // =========================================================================
+    function openTimetableModal() {
+      const days = [
+        { dow: 1, name: 'Lunedì' },
+        { dow: 2, name: 'Martedì' },
+        { dow: 3, name: 'Mercoledì' },
+        { dow: 4, name: 'Giovedì' },
+        { dow: 5, name: 'Venerdì' }
+      ];
+
+      document.getElementById('timetableGrid').innerHTML = days.map(day => {
+        const slots = [];
+        COURSES.forEach(c => {
+          c.schedule.filter(s => s.dow === day.dow).forEach(s => {
+            slots.push({ course: c, ...s });
+          });
+        });
+        slots.sort((a, b) => a.start.localeCompare(b.start));
+
+        return `
+          <div class="rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain/70 dark:bg-obsidian/50 p-3 flex flex-col gap-2.5">
+            <div class="text-[12px] font-semibold tracking-tight text-[#52525B] dark:text-[#A1A1AA] pb-1.5 border-b border-black/[0.06] dark:border-white/[0.06]">
+              ${day.name}
+            </div>
+            ${slots.length === 0 ? `<div class="text-[11.5px] text-[#8E8E93] py-4 text-center">Nessuna lezione</div>` : slots.map(s => `
+              <div class="rounded-lg bg-white dark:bg-cardDark border border-black/[0.07] dark:border-white/[0.07] p-2.5 space-y-2 shadow-sm">
+                <div class="flex items-center justify-between gap-1.5">
+                  <span class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold font-mono" style="color:${s.course.color}">
+                    <span class="w-2 h-2 rounded-full" style="background:${s.course.color}"></span>
+                    ${s.course.name}
+                  </span>
+                  <span class="font-mono text-[10.5px] text-[#8E8E93]">${s.room}</span>
+                </div>
+                <div class="text-[11.5px] font-mono tabular-nums text-[#52525B] dark:text-[#A1A1AA]">
+                  ${s.start}–${s.end}
+                  <span class="text-[#8E8E93]">· eff. ${formatHours(s.duration)}</span>
+                </div>
+                <button onclick="addMissedFromSlot('${s.course.id}', ${s.dow}, ${s.duration}, '${s.type}')"
+                  class="w-full py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11px] font-medium transition">
+                  + Segna persa
+                </button>
+              </div>
+            `).join('')}
+          </div>
+        `;
+      }).join('');
+
+      openModal('timetableModal');
+    }
+
+    function getMostRecentWeekdayIso(targetDow) {
+      const d = new Date();
+      const diff = (d.getDay() - targetDow + 7) % 7;
+      d.setDate(d.getDate() - diff);
+      return toIsoDate(d);
+    }
+
+    function addMissedFromSlot(courseId, dow, duration, type) {
+      openAddModal({
+        courseId,
+        date: getMostRecentWeekdayIso(dow),
+        duration,
+        type
       });
     }
 
-    function escapeHtml(str) {
-      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
-    }
-
+    // =========================================================================
+    // 7. ANALISI II GENERATOR (EXACT POLIMI EFFECTIVE DURATIONS)
+    // =========================================================================
     function generateAnalisiBacklog() {
       const start = new Date('2026-10-08T12:00:00');
       const end = new Date();
       const course = getCourse('ANALISI2');
       let added = 0;
+
       for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
         const dow = d.getDay();
         const slot = course.schedule.find(s => s.dow === dow);
         if (slot) {
-          const iso = d.toISOString().slice(0, 10);
+          const iso = toIsoDate(d);
           const id = `analisi2-${iso}`;
           if (!state.lessons.some(l => l.id === id)) {
             state.lessons.push({
@@ -1380,7 +1397,7 @@
               courseId: 'ANALISI2',
               date: iso,
               type: slot.type,
-              duration: slot.duration,
+              duration: slot.duration, // Mar: 90m, Gio: 135m, Ven: 135m
               stage: 0,
               topic: '',
               url: '',
@@ -1395,90 +1412,144 @@
       toast(`Aggiunte ${added} lezioni di Analisi II`);
     }
 
-    // Drawer
+    // =========================================================================
+    // 8. DETAIL DRAWER
+    // =========================================================================
     function openDrawer(id) {
       const l = state.lessons.find(x => x.id === id);
       if (!l) return;
       ui.activeLessonId = id;
+      ui.deleteArmed = false;
       const c = getCourse(l.courseId);
-      document.getElementById('drawerHeading').innerHTML = `<span class="dot" style="background:${c.color}"></span> ${c.name} · ${formatDateIT(l.date)}`;
+
+      document.getElementById('drawerHeading').innerHTML = `
+        <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${c.color}"></span>
+        <span>${c.name}</span>
+        <span class="text-[#8E8E93] font-normal">·</span>
+        <span class="font-mono text-[13px] font-medium tabular-nums text-[#52525B] dark:text-[#A1A1AA]">${formatDateReadable(l.date)}</span>
+      `;
+
       document.getElementById('drawerBody').innerHTML = `
-        <div class="field">
-          <label>Stato avanzamento</label>
-          <div class="stage-grid">
-            ${STAGES.map(s => `<button type="button" class="stage-chip ${l.stage === s.id ? 'active' : ''}" data-set-stage="${s.id}">${s.label}</button>`).join('')}
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1.5">Stato avanzamento</label>
+          <div class="grid grid-cols-4 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06]">
+            ${STAGES.map(s => `
+              <button type="button" data-set-stage="${s.id}" onclick="selectDrawerStage(${s.id})"
+                class="py-1.5 rounded-lg text-[11.5px] font-medium transition ${
+                  l.stage === s.id
+                    ? 'bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm font-semibold'
+                    : 'text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white'
+                }">${s.label}</button>
+            `).join('')}
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Data originale</label>
-            <input type="date" id="edDate" value="${l.date}" />
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Data originale</label>
+            <input id="edDate" type="date" value="${l.date}"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
           </div>
-          <div class="field">
-            <label>Durata (min)</label>
-            <input type="number" id="edDuration" value="${l.duration || 120}" min="15" step="15" />
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Durata effettiva (min)</label>
+            <input id="edDuration" type="number" value="${l.duration || c.defaultDuration}" min="15" step="15"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
           </div>
         </div>
-        <div class="field-row">
-          <div class="field">
-            <label>Tipo</label>
-            <select id="edType">
+
+        <div class="flex items-center gap-2">
+          <button type="button" onclick="document.getElementById('edDuration').value=90"
+            class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11px] font-medium transition">
+            Slot 2h · 1h 30m
+          </button>
+          <button type="button" onclick="document.getElementById('edDuration').value=135"
+            class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11px] font-medium transition">
+            Slot 3h · 2h 15m
+          </button>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Tipo</label>
+            <select id="edType"
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none">
               <option value="Lezione" ${l.type === 'Lezione' ? 'selected' : ''}>Lezione</option>
               <option value="Esercitazione" ${l.type === 'Esercitazione' ? 'selected' : ''}>Esercitazione</option>
               <option value="Laboratorio" ${l.type === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
             </select>
           </div>
-          <div class="field">
-            <label>Pianificata il</label>
-            <input type="datetime-local" id="edScheduled" value="${l.scheduled || ''}" />
+          <div>
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Pianificata il</label>
+            <input id="edScheduled" type="datetime-local" value="${l.scheduled || ''}"
+              class="w-full px-2.5 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12px] font-mono tabular-nums focus:outline-none" />
           </div>
         </div>
-        <div class="field">
-          <label>Argomento</label>
-          <input type="text" id="edTopic" value="${escapeHtml(l.topic || '')}" placeholder="Argomento trattato..." />
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Argomento</label>
+          <input id="edTopic" type="text" value="${escapeHtml(l.topic || '')}" placeholder="Argomento trattato..."
+            class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
         </div>
-        <div class="field">
-          <label>Link registrazione</label>
-          <div style="display:flex;gap:6px">
-            <input type="url" id="edUrl" value="${escapeHtml(l.url || '')}" placeholder="https://..." />
-            ${l.url ? `<a class="btn" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">Apri</a>` : ''}
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Link registrazione</label>
+          <div class="flex gap-2">
+            <input id="edUrl" type="url" value="${escapeHtml(l.url || '')}" placeholder="https://webeep.polimi.it/..."
+              class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
+            ${l.url ? `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] shrink-0">Apri</a>` : ''}
           </div>
         </div>
-        <div class="field">
-          <label>Note e dubbi da rivedere</label>
-          <textarea id="edNotes" rows="5" placeholder="Passaggi poco chiari, esercizi da rifare...">${escapeHtml(l.notes || '')}</textarea>
+
+        <div>
+          <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Note e dubbi da rivedere</label>
+          <textarea id="edNotes" rows="5" placeholder="Timestamp chiave, dubbi, esercizi da rifare..."
+            class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] leading-relaxed focus:outline-none">${escapeHtml(l.notes || '')}</textarea>
         </div>
       `;
 
+      renderDeleteButton();
+      document.getElementById('overlay').classList.remove('hidden');
+      document.getElementById('drawer').classList.remove('translate-x-full');
+    }
+
+    function selectDrawerStage(stageId) {
       document.querySelectorAll('[data-set-stage]').forEach(btn => {
-        btn.onclick = () => {
-          document.querySelectorAll('[data-set-stage]').forEach(b => b.classList.remove('active'));
-          btn.classList.add('active');
-        };
+        const active = Number(btn.dataset.setStage) === stageId;
+        btn.className = active
+          ? 'py-1.5 rounded-lg text-[11.5px] font-semibold bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm transition'
+          : 'py-1.5 rounded-lg text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white transition';
+        btn.dataset.active = active ? '1' : '0';
       });
-
-      document.getElementById('overlay').classList.add('open');
-      document.getElementById('drawer').classList.add('open');
     }
 
-    function closeAllOverlays() {
-      document.getElementById('overlay').classList.remove('open');
-      document.getElementById('drawer').classList.remove('open');
-      document.querySelectorAll('.modal').forEach(m => m.classList.remove('open'));
-      closeMobileSidebar();
+    function renderDeleteButton() {
+      const wrap = document.getElementById('drawerDeleteWrap');
+      if (!ui.deleteArmed) {
+        wrap.innerHTML = `<button onclick="armDeleteLesson()" class="px-2.5 py-1.5 rounded-lg text-[12.5px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition">Elimina</button>`;
+      } else {
+        wrap.innerHTML = `<button onclick="confirmDeleteLesson()" class="px-3 py-1.5 rounded-lg text-[12px] font-semibold bg-red-600 text-white hover:bg-red-700 transition">Conferma elimina</button>`;
+      }
     }
 
-    function closeMobileSidebar() {
-      document.getElementById('sidebar').classList.remove('open');
+    function armDeleteLesson() {
+      ui.deleteArmed = true;
+      renderDeleteButton();
     }
 
-    document.getElementById('saveDrawerBtn').onclick = () => {
+    function confirmDeleteLesson() {
+      state.lessons = state.lessons.filter(x => x.id !== ui.activeLessonId);
+      saveState();
+      closeAllOverlays();
+      toast('Lezione eliminata');
+    }
+
+    function saveDrawer() {
       const l = state.lessons.find(x => x.id === ui.activeLessonId);
       if (!l) return;
-      const activeStage = document.querySelector('[data-set-stage].active');
-      l.stage = activeStage ? Number(activeStage.dataset.setStage) : l.stage;
+      const activeStageBtn = document.querySelector('[data-set-stage][data-active="1"]');
+      if (activeStageBtn) l.stage = Number(activeStageBtn.dataset.setStage);
       l.date = document.getElementById('edDate').value || l.date;
-      l.duration = Number(document.getElementById('edDuration').value) || 120;
+      l.duration = Math.max(15, Number(document.getElementById('edDuration').value) || 90);
       l.type = document.getElementById('edType').value;
       l.scheduled = document.getElementById('edScheduled').value;
       l.topic = document.getElementById('edTopic').value.trim();
@@ -1487,70 +1558,114 @@
       saveState();
       closeAllOverlays();
       toast('Modifiche salvate');
-    };
+    }
 
-    document.getElementById('deleteLessonBtn').onclick = () => {
-      state.lessons = state.lessons.filter(x => x.id !== ui.activeLessonId);
+    function openCalFromDrawer() {
+      const id = ui.activeLessonId;
+      openCalModal(null, id);
+    }
+
+    // =========================================================================
+    // 9. ADD LESSON MODAL
+    // =========================================================================
+    function openAddModal(prefill = null) {
+      const sel = document.getElementById('addCourse');
+      const defaultCourseId = prefill?.courseId || (COURSES.some(c => c.id === ui.view) ? ui.view : 'ACSO');
+      sel.innerHTML = COURSES.map(c => `<option value="${c.id}" ${c.id === defaultCourseId ? 'selected' : ''}>${c.name}</option>`).join('');
+
+      document.getElementById('addDate').value = prefill?.date || toIsoDate(new Date());
+      document.getElementById('addType').value = prefill?.type || 'Lezione';
+      document.getElementById('addDuration').value = prefill?.duration || getCourse(defaultCourseId).defaultDuration;
+      document.getElementById('addTopic').value = '';
+      document.getElementById('addUrl').value = '';
+      openModal('addModal');
+    }
+
+    function onAddCourseChange() {
+      const courseId = document.getElementById('addCourse').value;
+      document.getElementById('addDuration').value = getCourse(courseId).defaultDuration;
+    }
+
+    function confirmAddLesson() {
+      const courseId = document.getElementById('addCourse').value;
+      const date = document.getElementById('addDate').value || toIsoDate(new Date());
+      state.lessons.push({
+        id: `${courseId.toLowerCase()}-${Date.now()}`,
+        courseId,
+        date,
+        type: document.getElementById('addType').value,
+        duration: Math.max(15, Number(document.getElementById('addDuration').value) || 90),
+        stage: 0,
+        topic: document.getElementById('addTopic').value.trim(),
+        url: document.getElementById('addUrl').value.trim(),
+        notes: '',
+        scheduled: ''
+      });
       saveState();
       closeAllOverlays();
-      toast('Lezione eliminata');
-    };
+      toast('Lezione aggiunta');
+    }
 
-    document.getElementById('drawerCalBtn').onclick = () => {
-      const id = ui.activeLessonId;
-      closeAllOverlays();
-      openCalModal(id);
-    };
-
-    // Google Calendar modal
-    function openCalModal(id) {
+    // =========================================================================
+    // 10. GOOGLE CALENDAR MODAL & .ICS EXPORT
+    // =========================================================================
+    function openCalModal(ev, id) {
+      if (ev) ev.stopPropagation();
       const l = state.lessons.find(x => x.id === id);
       if (!l) return;
       ui.calLessonId = id;
       const c = getCourse(l.courseId);
-      document.getElementById('calLessonSummary').textContent = `Recupero ${c.name} (${l.type} del ${formatDateIT(l.date)})`;
+
+      document.getElementById('calLessonSummary').textContent = `Recupero ${c.name} · ${l.type} del ${formatDateReadable(l.date)}`;
+
       const today = new Date();
-      const todayIso = today.toISOString().slice(0, 10);
-      const tom = new Date(today); tom.setDate(tom.getDate() + 1);
-      const tomIso = tom.toISOString().slice(0, 10);
+      const todayIso = toIsoDate(today);
+      const tom = new Date(today);
+      tom.setDate(tom.getDate() + 1);
+      const tomIso = toIsoDate(tom);
 
       document.getElementById('calDate').value = l.scheduled ? l.scheduled.split('T')[0] : todayIso;
       document.getElementById('calTime').value = l.scheduled ? (l.scheduled.split('T')[1] || '15:00') : '15:00';
 
-      document.getElementById('calQuickChips').innerHTML = `
-        <button class="chip" data-qd="${todayIso}" data-qt="14:30">Oggi 14:30</button>
-        <button class="chip" data-qd="${todayIso}" data-qt="17:30">Oggi 17:30</button>
-        <button class="chip" data-qd="${tomIso}" data-qt="09:00">Domani 09:00</button>
-        <button class="chip" data-qd="${tomIso}" data-qt="14:30">Domani 14:30</button>
-      `;
-      document.querySelectorAll('#calQuickChips .chip').forEach(ch => {
-        ch.onclick = () => {
-          document.getElementById('calDate').value = ch.dataset.qd;
-          document.getElementById('calTime').value = ch.dataset.qt;
-          updateCalInfo();
-        };
-      });
+      const chips = [
+        { label: 'Oggi 14:30', d: todayIso, t: '14:30' },
+        { label: 'Oggi 17:30', d: todayIso, t: '17:30' },
+        { label: 'Domani 09:00', d: tomIso, t: '09:00' },
+        { label: 'Domani 14:30', d: tomIso, t: '14:30' }
+      ];
+      document.getElementById('calQuickChips').innerHTML = chips.map(ch => `
+        <button type="button" onclick="applyCalChip('${ch.d}', '${ch.t}')"
+          class="px-2.5 py-1 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian hover:bg-black/[0.04] dark:hover:bg-white/[0.06] text-[11.5px] font-medium transition">
+          ${ch.label}
+        </button>
+      `).join('');
+
       updateCalInfo();
-      document.getElementById('overlay').classList.add('open');
-      document.getElementById('calModal').classList.add('open');
+      openModal('calModal');
+    }
+
+    function applyCalChip(d, t) {
+      document.getElementById('calDate').value = d;
+      document.getElementById('calTime').value = t;
+      updateCalInfo();
     }
 
     function updateCalInfo() {
       const l = state.lessons.find(x => x.id === ui.calLessonId);
       if (!l) return;
+      const base = l.duration || 90;
       const buf = document.getElementById('calBuffer').checked ? 15 : 0;
-      const total = effMinutes(l.duration || 120) + buf;
-      document.getElementById('calDurationInfo').textContent = `Durata blocco stimata: ${formatHours(total)} (lezione ${formatHours(l.duration)} a ${state.speed}x${buf ? ' + 15m appunti' : ''}).`;
+      const total = effMinutes(base) + buf;
+      document.getElementById('calDurationInfo').textContent = `Blocco stimato: ${formatHours(total)} (effettivi ${formatHours(base)} a ${state.speed}x${buf ? ' + 15m appunti' : ''})`;
     }
-    document.getElementById('calBuffer').onchange = updateCalInfo;
 
-    function buildCalDetails() {
+    function buildCalPayload() {
       const l = state.lessons.find(x => x.id === ui.calLessonId);
       const c = getCourse(l.courseId);
       const date = document.getElementById('calDate').value;
       const time = document.getElementById('calTime').value || '15:00';
       const buf = document.getElementById('calBuffer').checked ? 15 : 0;
-      const totalMins = effMinutes(l.duration || 120) + buf;
+      const totalMins = effMinutes(l.duration || 90) + buf;
 
       const start = new Date(`${date}T${time}:00`);
       const end = new Date(start.getTime() + totalMins * 60000);
@@ -1560,7 +1675,7 @@
         + String(d.getHours()).padStart(2, '0')
         + String(d.getMinutes()).padStart(2, '0') + '00';
 
-      const title = `Recupero ${l.type.toLowerCase()} ${formatDateIT(l.date)} ${c.name}`;
+      const title = `Recupero ${l.type.toLowerCase()} ${formatDateShort(l.date)} ${c.name}`;
       const details = [
         l.topic ? `Argomento: ${l.topic}` : '',
         l.url ? `Registrazione: ${l.url}` : '',
@@ -1572,20 +1687,20 @@
       return { title, details, startStr: fmt(start), endStr: fmt(end) };
     }
 
-    document.getElementById('openGcalBtn').onclick = () => {
-      const { title, details, startStr, endStr } = buildCalDetails();
+    function openGoogleCalendar() {
+      const { title, details, startStr, endStr } = buildCalPayload();
       const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(details)}`;
       window.open(url, '_blank', 'noopener');
       closeAllOverlays();
       toast('Pianificata e aperta su Google Calendar');
-    };
+    }
 
-    document.getElementById('downloadIcsBtn').onclick = () => {
-      const { title, details, startStr, endStr } = buildCalDetails();
+    function downloadICS() {
+      const { title, details, startStr, endStr } = buildCalPayload();
       const ics = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
-        'PRODID:-//RecuperoLezioni//IT',
+        'PRODID:-//RecuperoLezioni//PoliMi//IT',
         'BEGIN:VEVENT',
         `DTSTART:${startStr}`,
         `DTEND:${endStr}`,
@@ -1601,96 +1716,71 @@
       a.click();
       closeAllOverlays();
       toast('File .ics scaricato');
-    };
+    }
 
-    // Add Lesson Modal
-    document.getElementById('addLessonBtn').onclick = () => {
-      const sel = document.getElementById('addCourse');
-      sel.innerHTML = COURSES.map(c => `<option value="${c.id}" ${ui.view === c.id ? 'selected' : ''}>${c.name}</option>`).join('');
-      document.getElementById('addDate').value = new Date().toISOString().slice(0, 10);
-      document.getElementById('addTopic').value = '';
-      document.getElementById('addUrl').value = '';
-      document.getElementById('overlay').classList.add('open');
-      document.getElementById('addModal').classList.add('open');
-    };
+    // =========================================================================
+    // 11. SMART PICK MODAL ("HO X MIN")
+    // =========================================================================
+    function openSmartModal() {
+      document.getElementById('smartSpeedText').textContent = `${state.speed}x`;
+      renderSmartPick();
+      openModal('smartModal');
+    }
 
-    document.getElementById('confirmAddBtn').onclick = () => {
-      const courseId = document.getElementById('addCourse').value;
-      const date = document.getElementById('addDate').value || new Date().toISOString().slice(0, 10);
-      state.lessons.push({
-        id: `${courseId.toLowerCase()}-${Date.now()}`,
-        courseId,
-        date,
-        type: document.getElementById('addType').value,
-        duration: Number(document.getElementById('addDuration').value) || 120,
-        stage: 0,
-        topic: document.getElementById('addTopic').value.trim(),
-        url: document.getElementById('addUrl').value.trim(),
-        notes: '',
-        scheduled: ''
-      });
-      saveState();
-      closeAllOverlays();
-      toast('Lezione aggiunta');
-    };
+    function setSmartMins(m) {
+      document.getElementById('smartMinutes').value = m;
+      renderSmartPick();
+    }
 
-    // Smart Pick Modal
     function renderSmartPick() {
       const mins = Number(document.getElementById('smartMinutes').value) || 90;
       const open = state.lessons
         .filter(l => l.stage < 3)
-        .map(l => ({ ...l, eff: effMinutes(l.duration || 120) }))
+        .map(l => ({ ...l, eff: effMinutes(l.duration || 90) }))
         .filter(l => l.eff <= mins)
         .sort((a, b) => a.date.localeCompare(b.date));
 
       const box = document.getElementById('smartResults');
       if (open.length === 0) {
-        box.innerHTML = `<div class="help-box">Nessuna lezione completa sta in ${mins} min a ${state.speed}x. Prova ad aumentare la velocità o fare mezza lezione.</div>`;
+        box.innerHTML = `<div class="p-3.5 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12.5px] text-[#71717A] dark:text-[#A1A1AA]">Nessuna lezione completa rientra in ${mins} min a ${state.speed}x.</div>`;
         return;
       }
-      box.innerHTML = open.slice(0, 4).map(l => {
+
+      box.innerHTML = open.slice(0, 5).map(l => {
         const c = getCourse(l.courseId);
         return `
-          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
-            <div>
-              <div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px">
-                <span class="dot" style="background:${c.color}"></span> ${c.name} · ${formatDateIT(l.date)} (${l.type})
+          <div class="p-3 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-porcelain/70 dark:bg-obsidian/60 flex items-center justify-between gap-3">
+            <div class="min-w-0">
+              <div class="flex items-center gap-2 text-[13px] font-semibold">
+                <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+                <span>${c.name}</span>
+                <span class="font-mono text-[12px] text-[#71717A] dark:text-[#8E8E93] tabular-nums">${formatDateReadable(l.date)}</span>
               </div>
-              <div style="font-size:12px;color:var(--text-secondary)">Stimati ${formatHours(l.eff)} a ${state.speed}x</div>
+              <div class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums mt-0.5">
+                ${formatHours(l.eff)} a ${state.speed}x · ${escapeHtml(l.type)}
+              </div>
             </div>
-            <button class="btn" data-smart-cal="${l.id}">Pianifica</button>
+            <button onclick="openCalModal(null, '${l.id}')"
+              class="shrink-0 px-3 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12px] font-medium hover:opacity-90 transition">
+              Pianifica
+            </button>
           </div>
         `;
       }).join('');
-      box.querySelectorAll('[data-smart-cal]').forEach(b => {
-        b.onclick = () => { closeAllOverlays(); openCalModal(b.dataset.smartCal); };
-      });
     }
 
-    document.getElementById('smartPickBtn').onclick = () => {
-      document.getElementById('overlay').classList.add('open');
-      document.getElementById('smartModal').classList.add('open');
-      renderSmartPick();
-    };
-    document.getElementById('smartMinutes').oninput = renderSmartPick;
-    document.querySelectorAll('#smartModal .chip').forEach(ch => {
-      ch.onclick = () => {
-        document.getElementById('smartMinutes').value = ch.dataset.mins;
-        renderSmartPick();
-      };
-    });
-
-    // Sync Modal
-    document.getElementById('openSyncBtn').onclick = () => {
+    // =========================================================================
+    // 12. SYNC & BACKUP MODAL
+    // =========================================================================
+    function openSyncModal() {
       const cfg = getSyncConfig();
       document.getElementById('sbUrl').value = cfg.url;
       document.getElementById('sbKey').value = cfg.key;
       document.getElementById('sbSyncKey').value = cfg.syncKey;
-      document.getElementById('overlay').classList.add('open');
-      document.getElementById('syncModal').classList.add('open');
-    };
+      openModal('syncModal');
+    }
 
-    document.getElementById('saveSyncBtn').onclick = async () => {
+    async function saveAndSync() {
       const cfg = {
         url: document.getElementById('sbUrl').value.trim().replace(/\/$/, ''),
         key: document.getElementById('sbKey').value.trim(),
@@ -1698,18 +1788,17 @@
       };
       localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg));
       await pullFromSupabase(false);
-    };
-    document.getElementById('forcePullBtn').onclick = () => pullFromSupabase(false);
-    document.getElementById('forcePushBtn').onclick = () => pushToSupabase(false);
+    }
 
-    document.getElementById('exportJsonBtn').onclick = () => {
+    function exportJSON() {
       const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `backup-recupero-lezioni-${new Date().toISOString().slice(0, 10)}.json`;
+      a.download = `backup-recupero-lezioni-${toIsoDate(new Date())}.json`;
       a.click();
-    };
-    document.getElementById('importJsonInput').onchange = (e) => {
+    }
+
+    function importJSON(e) {
       const file = e.target.files[0];
       if (!file) return;
       const reader = new FileReader();
@@ -1717,6 +1806,7 @@
         try {
           const parsed = JSON.parse(reader.result);
           if (!Array.isArray(parsed.lessons)) throw new Error('Formato non valido');
+          migrateEffectiveDurations(parsed);
           state = parsed;
           saveState();
           closeAllOverlays();
@@ -1726,47 +1816,22 @@
         }
       };
       reader.readAsText(file);
-    };
+      e.target.value = '';
+    }
 
-    // Global controls
-    document.getElementById('themeBtn').onclick = () => {
-      state.theme = state.theme === 'dark' ? 'light' : 'dark';
-      applyTheme();
-      saveState();
-    };
-    document.getElementById('speedSelect').onchange = (e) => {
-      state.speed = Number(e.target.value);
-      saveState();
-    };
-    document.getElementById('dailyHoursInput').onchange = (e) => {
-      state.dailyHours = Math.max(0.5, Number(e.target.value) || 2);
-      saveState();
-    };
-    document.querySelectorAll('#stageFilter .seg-btn').forEach(b => {
-      b.onclick = () => {
-        document.querySelectorAll('#stageFilter .seg-btn').forEach(x => x.classList.remove('active'));
-        b.classList.add('active');
-        ui.filter = b.dataset.filter;
-        render();
-      };
-    });
-    document.getElementById('searchInput').oninput = (e) => {
+    // =========================================================================
+    // 13. GLOBAL LISTENERS & BOOTSTRAP
+    // =========================================================================
+    document.getElementById('searchInput').addEventListener('input', e => {
       ui.search = e.target.value.trim();
-      render();
-    };
-    document.getElementById('mobileMenuBtn').onclick = () => {
-      document.getElementById('sidebar').classList.add('open');
-      document.getElementById('overlay').classList.add('open');
-    };
-    document.getElementById('overlay').onclick = closeAllOverlays;
-    document.getElementById('closeDrawerBtn').onclick = closeAllOverlays;
-    document.querySelectorAll('[data-close-modal]').forEach(b => b.onclick = closeAllOverlays);
+      renderLessonList();
+    });
 
-    document.addEventListener('keydown', (e) => {
+    document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeAllOverlays();
-      if (e.key.toLowerCase() === 'n' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+      if (e.key.toLowerCase() === 'n' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
         e.preventDefault();
-        document.getElementById('addLessonBtn').click();
+        openAddModal();
       }
     });
 
