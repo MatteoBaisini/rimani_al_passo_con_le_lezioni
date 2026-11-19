@@ -17,10 +17,14 @@
   <!-- Optional external config for GitHub Pages / Supabase -->
   <script src="config.js"></script>
 
-  <!-- Typography: Plus Jakarta Sans & JetBrains Mono -->
+  <!-- Typography: Inter (UI, tabular figures) & JetBrains Mono (keys / technical values only) -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <style>
+    body { font-feature-settings: 'cv11', 'ss01', 'ss03'; }
+    .tabular-nums { font-variant-numeric: tabular-nums; }
+  </style>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -30,7 +34,7 @@
       theme: {
         extend: {
           fontFamily: {
-            sans: ['"Plus Jakarta Sans"', '-apple-system', 'BlinkMacSystemFont', 'sans-serif'],
+            sans: ['Inter', '-apple-system', 'BlinkMacSystemFont', '"Segoe UI"', 'sans-serif'],
             mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'monospace'],
           },
           colors: {
@@ -77,7 +81,7 @@
           </div>
           <div class="min-w-0">
             <div class="text-[14px] font-semibold tracking-tight leading-tight truncate">Recupero Lezioni</div>
-            <div class="text-[10.5px] font-mono text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · 2026</div>
+            <div class="text-[10.5px] text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · 2026</div>
           </div>
         </div>
         <button id="themeBtn" onclick="toggleTheme()" title="Cambia tema" aria-label="Cambia tema"
@@ -97,7 +101,7 @@
               </svg>
               <span class="truncate">Tutte le lezioni</span>
             </span>
-            <span id="cnt-all" class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
+            <span id="cnt-all" class="text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
           </button>
 
           <button id="nav-scheduled" onclick="setView('scheduled')"
@@ -108,7 +112,7 @@
               </svg>
               <span class="truncate">Pianificate</span>
             </span>
-            <span id="cnt-scheduled" class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
+            <span id="cnt-scheduled" class="text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">0</span>
           </button>
         </div>
 
@@ -132,7 +136,7 @@
         <div>
           <div class="flex items-center justify-between mb-1.5">
             <span class="text-[11px] font-medium text-[#71717A] dark:text-[#A1A1AA]">Velocità riproduzione</span>
-            <span id="speedIndicator" class="font-mono text-[11px] font-semibold tabular-nums">1.25x</span>
+            <span id="speedIndicator" class="text-[11px] font-semibold tabular-nums">1.25x</span>
           </div>
           <div id="speedPills" class="grid grid-cols-5 gap-1 p-1 rounded-lg bg-black/[0.04] dark:bg-white/[0.06]">
             <!-- Populated by JS -->
@@ -147,7 +151,7 @@
               class="w-7 h-7 flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M5 12h14"/></svg>
             </button>
-            <span id="dailyHoursLabel" class="px-2 font-mono text-[12px] font-semibold tabular-nums min-w-[46px] text-center">2.0h</span>
+            <span id="dailyHoursLabel" class="px-2 text-[12px] font-semibold tabular-nums min-w-[46px] text-center">2.0h</span>
             <button onclick="stepDailyHours(0.5)" aria-label="Aumenta obiettivo"
               class="w-7 h-7 flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.04] dark:hover:bg-white/[0.06] transition">
               <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" d="M12 5v14M5 12h14"/></svg>
@@ -188,7 +192,7 @@
               <span id="viewHeaderDot" class="w-2.5 h-2.5 rounded-full hidden shrink-0"></span>
               <h1 id="viewTitle" class="text-[16px] sm:text-[17px] font-semibold tracking-tight truncate">Tutte le lezioni</h1>
             </div>
-            <p id="viewSubtitle" class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums truncate"></p>
+            <p id="viewSubtitle" class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] tabular-nums truncate"></p>
           </div>
         </div>
 
@@ -228,31 +232,30 @@
           <!-- Populated by JS -->
         </section>
 
-        <!-- KPI Summary Strip + Overall Completion Progress -->
-        <section class="space-y-3">
-          <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+        <!-- Summary Panel: KPIs + stacked progress (one segment per stage) -->
+        <section class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden">
+          <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-px bg-black/[0.06] dark:bg-white/[0.06]">
             <!-- Populated by JS -->
           </div>
-          <!-- Stacked Progress Bar (one segment per stage) -->
-          <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl px-4 py-3 shadow-card">
-            <div class="flex items-center justify-between text-[11.5px] mb-2">
-              <span class="font-medium text-[#52525B] dark:text-[#A1A1AA]">Avanzamento complessivo</span>
-              <span id="overallPctText" class="font-mono font-semibold tabular-nums">0%</span>
+          <div class="px-5 py-4 border-t border-black/[0.06] dark:border-white/[0.06]">
+            <div class="flex items-center justify-between text-[12px] mb-2.5">
+              <span class="font-medium text-[#52525B] dark:text-[#A1A1AA]">Avanzamento</span>
+              <span id="overallPctText" class="font-semibold tabular-nums">0%</span>
             </div>
             <div id="overallProgressBar" class="h-2 w-full rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden flex gap-px">
               <!-- Populated by JS -->
             </div>
-            <div id="stageLegend" class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#71717A] dark:text-[#8E8E93]">
+            <div id="stageLegend" class="mt-3 flex flex-wrap items-center gap-x-5 gap-y-1.5 text-[11.5px] text-[#71717A] dark:text-[#8E8E93]">
               <!-- Populated by JS -->
             </div>
           </div>
         </section>
 
         <!-- Course Overview Cards (only in "Tutte le lezioni") -->
-        <section id="courseOverviewSection" class="space-y-2.5">
-          <div class="flex items-center justify-between">
-            <h2 class="text-[12px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">Panoramica materie</h2>
-            <span class="text-[11px] font-mono text-[#71717A] dark:text-[#8E8E93]">Slot 2h = 1h 30m · Slot 3h = 2h 15m</span>
+        <section id="courseOverviewSection" class="space-y-3">
+          <div class="flex items-baseline justify-between gap-3">
+            <h2 class="text-[13px] font-semibold">Materie</h2>
+            <span class="hidden sm:inline text-[11.5px] text-[#8E8E93]">Durate effettive: slot 2h = 1h 30m · slot 3h = 2h 15m</span>
           </div>
           <div id="courseOverviewGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <!-- Populated by JS -->
@@ -265,7 +268,7 @@
         </section>
 
         <!-- Toolbar: Segmented Filter + Search -->
-        <section class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <section class="pt-2 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div id="stageFilter" class="inline-flex p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06] border border-black/[0.04] dark:border-white/[0.04] self-start">
             <button data-filter="open" onclick="setFilter('open')" class="px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition">Da recuperare</button>
             <button data-filter="all" onclick="setFilter('all')" class="px-3 py-1.5 rounded-lg text-[12.5px] font-medium transition">Tutte</button>
@@ -276,14 +279,14 @@
             <svg class="w-4 h-4 text-[#8E8E93] absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
-            <input id="searchInput" type="search" placeholder="Cerca data, argomento, note..."
+            <input id="searchInput" type="search" placeholder="Cerca lezioni..."
               class="peer w-full pl-9 pr-9 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark text-[13px] placeholder:text-[#8E8E93] focus:outline-none focus:border-black/25 dark:focus:border-white/25 transition shadow-sm" />
             <kbd class="hidden sm:flex peer-focus:hidden absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 items-center justify-center rounded border border-black/[0.1] dark:border-white/[0.12] font-mono text-[10.5px] text-[#8E8E93]">/</kbd>
           </div>
         </section>
 
         <!-- Lesson List, grouped by week -->
-        <section id="lessonList" class="space-y-4">
+        <section id="lessonList">
           <!-- Populated by JS -->
         </section>
       </main>
@@ -383,12 +386,12 @@
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Data originale</label>
             <input id="addDate" type="date"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Durata effettiva (min)</label>
             <input id="addDuration" type="number" min="15" max="360" step="15" value="90"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
         </div>
 
@@ -441,19 +444,19 @@
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Giorno</label>
             <input id="calDate" type="date" onchange="updateCalInfo()"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Ora inizio</label>
             <input id="calTime" type="time" value="15:00" onchange="updateCalInfo()"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
         </div>
         <label class="flex items-center gap-2.5 text-[13px] cursor-pointer select-none">
           <input id="calBuffer" type="checkbox" checked onchange="updateCalInfo()" class="w-4 h-4 rounded accent-[#111113] dark:accent-[#F4F4F5]" />
           <span>Aggiungi +15 min di margine per appunti</span>
         </label>
-        <div id="calDurationInfo" class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] font-mono tabular-nums"></div>
+        <div id="calDurationInfo" class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] tabular-nums"></div>
       </div>
       <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2">
         <button onclick="downloadICS()" class="px-3.5 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] text-[12.5px] font-medium transition">
@@ -477,7 +480,7 @@
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
         <div>
           <h2 class="text-[15px] font-semibold tracking-tight">Ho X minuti liberi</h2>
-          <p class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93]">Calcolato a <span id="smartSpeedText" class="font-mono font-semibold">1.25x</span> sulle durate effettive</p>
+          <p class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93]">Calcolato a <span id="smartSpeedText" class="font-semibold">1.25x</span> sulle durate effettive</p>
         </div>
         <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
@@ -486,12 +489,12 @@
       <div class="p-5 space-y-4 overflow-y-auto">
         <div class="flex items-center gap-2">
           <input id="smartMinutes" type="number" value="90" min="30" max="360" step="15" oninput="renderSmartPick()"
-            class="w-24 px-3 py-1.5 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums font-semibold focus:outline-none" />
+            class="w-24 px-3 py-1.5 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums font-semibold focus:outline-none" />
           <div class="flex flex-wrap gap-1.5">
-            <button onclick="setSmartMins(60)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">60m</button>
-            <button onclick="setSmartMins(90)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">90m</button>
-            <button onclick="setSmartMins(120)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h</button>
-            <button onclick="setSmartMins(150)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-mono hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h 30m</button>
+            <button onclick="setSmartMins(60)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">60m</button>
+            <button onclick="setSmartMins(90)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">90m</button>
+            <button onclick="setSmartMins(120)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h</button>
+            <button onclick="setSmartMins(150)" class="px-2.5 py-1 rounded-md border border-black/[0.08] dark:border-white/[0.08] text-[12px] hover:bg-black/[0.04] dark:hover:bg-white/[0.06]">2h 30m</button>
           </div>
         </div>
         <div id="smartResults" class="space-y-2"></div>
@@ -574,8 +577,8 @@
       { id: 3, label: 'Completata' }
     ];
 
-    // Same hues as stageRingSVG
-    const STAGE_COLORS = ['#A1A1AA', '#D97706', '#2563EB', '#16A34A'];
+    // One green ramp for progress, so it never clashes with course colors (same hues as stageRingSVG)
+    const STAGE_COLORS = ['#A1A1AA', '#6EC9A4', '#10B981', '#047857'];
 
     const SPEED_OPTIONS = [1, 1.25, 1.5, 1.75, 2];
 
@@ -585,8 +588,8 @@
         id: 'ACSO',
         name: 'ACSO',
         fullName: 'Architettura dei Calcolatori e Sistemi Operativi',
-        color: '#D97706',
-        tint: 'rgba(217, 119, 6, 0.12)',
+        color: '#2563EB',
+        tint: 'rgba(37, 99, 235, 0.10)',
         defaultDuration: 135,
         schedule: [
           { dow: 2, start: '08:15', end: '11:15', room: 'B.4.4', slotHours: 3, duration: 135, type: 'Lezione' },
@@ -599,7 +602,7 @@
         name: 'ONDE',
         fullName: 'Onde Elettromagnetiche e Mezzi Trasmissivi',
         color: '#EA580C',
-        tint: 'rgba(234, 88, 12, 0.12)',
+        tint: 'rgba(234, 88, 12, 0.10)',
         defaultDuration: 90,
         schedule: [
           { dow: 3, start: '14:15', end: '16:15', room: '8.1.1', slotHours: 2, duration: 90, type: 'Lezione' },
@@ -611,7 +614,7 @@
         name: 'LEA',
         fullName: 'Logica e Algebra',
         color: '#DB2777',
-        tint: 'rgba(219, 39, 119, 0.12)',
+        tint: 'rgba(219, 39, 119, 0.10)',
         defaultDuration: 90,
         schedule: [
           { dow: 2, start: '14:15', end: '16:15', room: '25.S.3', slotHours: 2, duration: 90, type: 'Lezione' },
@@ -622,8 +625,8 @@
         id: 'ANALISI2',
         name: 'ANALISI II',
         fullName: 'Analisi Matematica 2',
-        color: '#16A34A',
-        tint: 'rgba(22, 163, 74, 0.12)',
+        color: '#7C3AED',
+        tint: 'rgba(124, 58, 237, 0.10)',
         defaultDuration: 135,
         schedule: [
           { dow: 2, start: '11:15', end: '13:15', room: 'B.4.4', slotHours: 2, duration: 90,  type: 'Lezione' },
@@ -910,18 +913,18 @@
         </svg>`;
       }
       if (stage === 1) {
-        return `<svg class="w-[18px] h-[18px] text-[#D97706]" viewBox="0 0 24 24" fill="none">
+        return `<svg class="w-[18px] h-[18px] text-[#6EC9A4]" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.75" />
           <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="currentColor" />
         </svg>`;
       }
       if (stage === 2) {
-        return `<svg class="w-[18px] h-[18px] text-[#2563EB]" viewBox="0 0 24 24" fill="none">
+        return `<svg class="w-[18px] h-[18px] text-[#10B981]" viewBox="0 0 24 24" fill="none">
           <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.75" />
           <path d="M12 3.5A8.5 8.5 0 1 1 3.5 12H12V3.5Z" fill="currentColor" />
         </svg>`;
       }
-      return `<svg class="w-[18px] h-[18px] text-[#16A34A]" viewBox="0 0 24 24" fill="none">
+      return `<svg class="w-[18px] h-[18px] text-[#047857] dark:text-[#10B981]" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="8.5" fill="currentColor" />
         <path d="M8.5 12.2l2.3 2.3 4.7-4.8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
       </svg>`;
@@ -1003,7 +1006,7 @@
               <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
               <span class="truncate">${c.name}</span>
             </span>
-            <span class="font-mono text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">${cnt}</span>
+            <span class="text-[11px] tabular-nums px-1.5 py-0.5 rounded-md bg-black/[0.04] dark:bg-white/[0.06] text-[#71717A] dark:text-[#A1A1AA]">${cnt}</span>
           </button>
         `;
       }).join('');
@@ -1013,7 +1016,7 @@
       document.getElementById('speedPills').innerHTML = SPEED_OPTIONS.map(sp => {
         const active = Number(state.speed) === sp;
         return `<button onclick="setSpeed(${sp})"
-          class="py-1 rounded-md font-mono text-[11px] tabular-nums font-medium transition ${
+          class="py-1 rounded-md text-[11px] tabular-nums font-medium transition ${
             active
               ? 'bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm'
               : 'text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white'
@@ -1046,7 +1049,9 @@
       if (ui.view === 'all') {
         dot.classList.add('hidden');
         title.textContent = 'Tutte le lezioni';
-        sub.textContent = `${formatHours(adjMins)} a ${state.speed}x · pareggio ${targetStr}`;
+        sub.textContent = daysNeeded
+          ? `${formatHours(adjMins)} da recuperare a ${state.speed}x · in pari entro ${targetStr}`
+          : 'Nessun arretrato';
       } else if (ui.view === 'scheduled') {
         dot.classList.add('hidden');
         title.textContent = 'Pianificate su Calendar';
@@ -1057,39 +1062,29 @@
         dot.classList.remove('hidden');
         dot.style.background = c.color;
         title.textContent = c.fullName;
-        sub.textContent = `${scopeOpen.length} aperte · ${formatHours(adjMins)} a ${state.speed}x`;
+        sub.textContent = `${scopeOpen.length} da recuperare · ${formatHours(adjMins)} a ${state.speed}x`;
       }
 
       // KPI Cards
       const scheduledOpen = scopeOpen.filter(l => l.scheduled).length;
-      document.getElementById('kpiGrid').innerHTML = `
-        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
-          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Arretrate</div>
-          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${scopeOpen.length}</div>
-          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${scopeDone.length} completate</div>
-        </div>
-        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
-          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Tempo effettivo (${state.speed}x)</div>
-          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${formatHours(adjMins)}</div>
-          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${formatHours(baseMins)} a 1x</div>
-        </div>
-        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
-          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Pareggio stimato</div>
-          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${targetStr}</div>
-          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">${daysNeeded} gg a ${dailyHrs.toFixed(1)}h/g</div>
-        </div>
-        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl p-4 shadow-card">
-          <div class="text-[11.5px] font-medium text-[#71717A] dark:text-[#8E8E93]">Pianificate</div>
-          <div class="mt-1.5 font-mono text-[22px] font-semibold tabular-nums tracking-tight">${scheduledOpen}</div>
-          <div class="mt-0.5 text-[11px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums">su ${scopeOpen.length} aperte</div>
-        </div>
-      `;
+      const kpi = (label, value, sub) => `
+        <div class="bg-white dark:bg-cardDark px-5 py-4">
+          <div class="text-[12px] font-medium text-[#71717A] dark:text-[#8E8E93]">${label}</div>
+          <div class="mt-1 text-[24px] leading-8 font-semibold tabular-nums tracking-tight">${value}</div>
+          <div class="text-[11.5px] text-[#8E8E93] tabular-nums">${sub}</div>
+        </div>`;
+      document.getElementById('kpiGrid').innerHTML = [
+        kpi('Da recuperare', scopeOpen.length, `${scopeDone.length} completate`),
+        kpi(`Tempo a ${state.speed}x`, formatHours(adjMins), `${formatHours(baseMins)} a velocità normale`),
+        kpi('In pari entro', targetStr, daysNeeded ? `${daysNeeded} giorni a ${dailyHrs.toFixed(1)}h al giorno` : 'Nessun arretrato'),
+        kpi('In calendario', scheduledOpen, `su ${scopeOpen.length} da recuperare`)
+      ].join('');
 
       // Overall Completion Bar
       const total = scopeLessons.length;
       const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / 3), 0);
       const pct = total === 0 ? 100 : Math.round((weightedDone / total) * 100);
-      document.getElementById('overallPctText').textContent = `${pct}% (${scopeDone.length}/${total})`;
+      document.getElementById('overallPctText').textContent = `${pct}%`;
 
       // One segment per started stage (done first), "Da vedere" is the empty track
       const stageCounts = STAGES.map(s => scopeLessons.filter(l => l.stage === s.id).length);
@@ -1101,7 +1096,7 @@
         <span class="inline-flex items-center gap-1.5">
           <span class="w-2 h-2 rounded-full" style="background:${STAGE_COLORS[s.id]}"></span>
           ${s.label}
-          <span class="font-mono tabular-nums font-semibold text-[#111113] dark:text-[#F4F4F5]">${stageCounts[s.id]}</span>
+          <span class="tabular-nums font-semibold text-[#111113] dark:text-[#F4F4F5]">${stageCounts[s.id]}</span>
         </span>
       `).join('');
     }
@@ -1144,42 +1139,43 @@
       const effMin = effMinutes(l.duration || c.defaultDuration);
       const nextStage = STAGES[l.stage + 1];
 
+      const actionLabels = ['', 'Segna come vista', 'Appunti completati', 'Segna completata'];
+      const btnBase = 'inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg text-[13px] font-medium transition';
+
       sec.innerHTML = `
-        <div class="relative bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden">
-          <div class="absolute inset-y-0 left-0 w-1" style="background:${c.color}"></div>
-          <div class="pl-5 pr-4 sm:pr-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="min-w-0 space-y-1.5">
-              <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">
-                Prossima da recuperare
-                <span class="normal-case tracking-normal font-medium font-mono tabular-nums">· ${escapeHtml(next.reason)}</span>
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card p-5">
+          <div class="flex items-center justify-between gap-3">
+            <span class="text-[12px] font-medium text-[#71717A] dark:text-[#8E8E93]">Prossima da recuperare</span>
+            <span class="text-[11.5px] tabular-nums text-[#8E8E93] truncate">${escapeHtml(next.reason)}</span>
+          </div>
+          <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="flex items-center gap-4 min-w-0">
+              <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0" style="background:${c.tint}; color:${c.color}">
+                <span class="text-[17px] leading-none font-semibold tabular-nums">${l.date.slice(8)}</span>
+                <span class="mt-0.5 text-[10px] leading-none font-semibold uppercase">${formatDateReadable(l.date).slice(7)}</span>
               </div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <span class="text-[17px] font-semibold tracking-tight">${c.fullName}</span>
-                <span class="px-2 py-0.5 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian text-[11px] text-[#52525B] dark:text-[#A1A1AA]">${escapeHtml(l.type)}</span>
-              </div>
-              <div class="flex items-center gap-3 font-mono text-[12px] tabular-nums text-[#52525B] dark:text-[#A1A1AA]">
-                <span>${formatDateReadable(l.date)}</span>
-                <span class="w-1 h-1 rounded-full bg-current opacity-40"></span>
-                <span class="font-semibold text-[#111113] dark:text-[#F4F4F5]">${formatHours(effMin)}</span>
-                <span>a ${state.speed}x</span>
-                ${l.topic ? `<span class="hidden sm:inline font-sans text-[12.5px] truncate max-w-[260px]">· ${escapeHtml(l.topic)}</span>` : ''}
+              <div class="min-w-0">
+                <div class="text-[16px] font-semibold tracking-tight truncate">${c.fullName}</div>
+                <div class="mt-0.5 text-[12.5px] text-[#71717A] dark:text-[#8E8E93] tabular-nums truncate">
+                  ${escapeHtml(l.type)} · ${formatDateReadable(l.date)} · <span class="text-[#111113] dark:text-[#F4F4F5] font-medium">${formatHours(effMin)}</span> a ${state.speed}x${l.topic ? ` · ${escapeHtml(l.topic)}` : ''}
+                </div>
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
               ${l.url ? `
                 <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener"
-                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
+                  class="${btnBase} flex-1 sm:flex-none border border-black/[0.1] dark:border-white/[0.1] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
                   Guarda
                 </a>` : `
                 <button onclick="openDrawer('${l.id}')"
-                  class="px-3 py-2 rounded-xl border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
-                  Dettagli
+                  class="${btnBase} flex-1 sm:flex-none border border-black/[0.1] dark:border-white/[0.1] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover">
+                  Apri
                 </button>`}
               <button onclick="cycleStage(event, '${l.id}')"
-                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
-                <span class="w-2 h-2 rounded-full" style="background:${STAGE_COLORS[nextStage.id]}"></span>
-                Segna "${nextStage.label}"
+                class="${btnBase} whitespace-nowrap flex-1 sm:flex-none bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] hover:opacity-90">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>
+                ${actionLabels[nextStage.id]}
               </button>
             </div>
           </div>
@@ -1200,29 +1196,28 @@
         const open = all.filter(l => l.stage < 3);
         const done = all.filter(l => l.stage === 3);
         const adjMins = open.reduce((s, l) => s + effMinutes(l.duration || c.defaultDuration), 0);
-        const pct = all.length === 0 ? 0 : Math.round((done.length / all.length) * 100);
+        // Stage-weighted, same metric as the overall bar
+        const pct = all.length === 0 ? 0 : Math.round(all.reduce((s, l) => s + l.stage / 3, 0) / all.length * 100);
         const isAnalisiPending = c.id === 'ANALISI2' && all.length === 0;
 
         return `
           <button onclick="setView('${c.id}')"
-            class="text-left bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] hover:border-black/[0.18] dark:hover:border-white/[0.18] rounded-xl p-3.5 shadow-card transition group">
-            <div class="flex items-center justify-between gap-2">
-              <span class="flex items-center gap-2 min-w-0">
-                <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${c.color}"></span>
-                <span class="text-[13px] font-semibold tracking-tight truncate">${c.name}</span>
-              </span>
-              <span class="font-mono text-[11px] tabular-nums text-[#71717A] dark:text-[#8E8E93]">
-                ${isAnalisiPending ? 'dal 06/10' : `${open.length} aperte`}
-              </span>
+            class="text-left bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] hover:border-black/[0.18] dark:hover:border-white/[0.18] hover:shadow-float rounded-xl p-4 shadow-card transition flex flex-col justify-start">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+              <span class="text-[13px] font-semibold truncate">${c.name}</span>
             </div>
-            <div class="mt-2.5 flex items-baseline justify-between">
-              <span class="font-mono text-[15px] font-semibold tabular-nums">
-                ${isAnalisiPending ? 'Da pianificare' : formatHours(adjMins)}
-              </span>
-              <span class="font-mono text-[10.5px] tabular-nums text-[#8E8E93]">${all.length > 0 ? `${pct}%` : ''}</span>
+            <div class="mt-3 text-[20px] leading-7 font-semibold tabular-nums tracking-tight">
+              ${isAnalisiPending ? '—' : open.length ? formatHours(adjMins) : 'In pari'}
             </div>
-            <div class="mt-2 h-1 w-full rounded-full bg-black/[0.05] dark:bg-white/[0.07] overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-300" style="width:${isAnalisiPending ? 0 : (all.length ? Math.max(pct, 6) : 100)}%; background:${c.color}"></div>
+            <div class="text-[11.5px] tabular-nums text-[#8E8E93] truncate">
+              ${isAnalisiPending ? 'Nessuna lezione dal 06/10' : `${open.length} da recuperare · ${done.length} fatte`}
+            </div>
+            <div class="mt-3 flex items-center gap-2">
+              <div class="flex-1 h-1 rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden">
+                <div class="h-full rounded-full transition-all duration-300" style="width:${pct}%; background:${c.color}"></div>
+              </div>
+              <span class="text-[11px] tabular-nums text-[#8E8E93] w-8 text-right">${isAnalisiPending ? '' : `${pct}%`}</span>
             </div>
           </button>
         `;
@@ -1238,7 +1233,7 @@
           <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl p-4 sm:p-5 shadow-card flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div class="space-y-1">
               <div class="flex items-center gap-2">
-                <span class="w-2 h-2 rounded-full bg-[#16A34A]"></span>
+                <span class="w-2 h-2 rounded-full bg-[#7C3AED]"></span>
                 <h3 class="text-[14px] font-semibold">Analisi Matematica 2 — fermo al 06/10</h3>
               </div>
               <p class="text-[12.5px] text-[#52525B] dark:text-[#A1A1AA]">
@@ -1271,7 +1266,7 @@
         btn.className = active
           ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm transition'
           : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white transition';
-        btn.innerHTML = `${labels[f]}<span class="font-mono text-[10.5px] tabular-nums opacity-60">${counts[f]}</span>`;
+        btn.innerHTML = `${labels[f]}<span class="text-[10.5px] tabular-nums opacity-60">${counts[f]}</span>`;
       });
     }
 
@@ -1321,24 +1316,26 @@
         g.lessons.push(l);
       });
 
-      container.innerHTML = groups.map(g => {
-        const openMins = g.lessons
-          .filter(l => l.stage < 3)
-          .reduce((s, l) => s + effMinutes(l.duration || getCourse(l.courseId).defaultDuration), 0);
-        return `
-          <div class="space-y-2">
-            <div class="px-1 flex items-baseline justify-between gap-3">
-              <h3 class="text-[12px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">${weekLabel(g.week)}</h3>
-              <span class="font-mono text-[11px] tabular-nums text-[#8E8E93]">
-                ${g.lessons.length} ${g.lessons.length === 1 ? 'lezione' : 'lezioni'}${openMins ? ` · ${formatHours(openMins)}` : ''}
-              </span>
-            </div>
-            <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden divide-y divide-black/[0.06] dark:divide-white/[0.06]">
-              ${g.lessons.map(lessonRowHtml).join('')}
-            </div>
-          </div>
-        `;
-      }).join('');
+      container.innerHTML = `
+        <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden">
+          ${groups.map(g => {
+            const openMins = g.lessons
+              .filter(l => l.stage < 3)
+              .reduce((s, l) => s + effMinutes(l.duration || getCourse(l.courseId).defaultDuration), 0);
+            return `
+              <div class="px-4 sm:px-5 py-2 flex items-center justify-between gap-3 bg-porcelain/70 dark:bg-white/[0.025] border-y border-black/[0.06] dark:border-white/[0.06] first:border-t-0">
+                <h3 class="text-[11.5px] font-semibold text-[#52525B] dark:text-[#A1A1AA]">${weekLabel(g.week)}</h3>
+                <span class="text-[11.5px] tabular-nums text-[#8E8E93]">
+                  ${g.lessons.length} ${g.lessons.length === 1 ? 'lezione' : 'lezioni'}${openMins ? ` · ${formatHours(openMins)}` : ''}
+                </span>
+              </div>
+              <div class="divide-y divide-black/[0.05] dark:divide-white/[0.05]">
+                ${g.lessons.map(lessonRowHtml).join('')}
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
     }
 
     function lessonRowHtml(l) {
@@ -1347,48 +1344,49 @@
         const effMin = effMinutes(baseMin);
         const isDone = l.stage === 3;
 
+        const [weekday, , month] = formatDateReadable(l.date).split(' ');
+
         return `
           <div onclick="openDrawer('${l.id}')"
-            class="group px-3.5 sm:px-5 py-3 flex items-center justify-between gap-3 cursor-pointer hover:bg-porcelain/70 dark:hover:bg-cardDarkHover transition ${isDone ? 'opacity-55' : ''}">
+            class="group px-3 sm:px-5 py-2.5 flex items-center gap-3 sm:gap-4 cursor-pointer hover:bg-porcelain/60 dark:hover:bg-cardDarkHover transition">
 
-            <!-- Left: Ring + Course Pill + Date + Type + Topic -->
-            <div class="flex items-center gap-3 min-w-0 flex-1">
-              <button onclick="cycleStage(event, '${l.id}')" title="Stato: ${STAGES[l.stage].label} (clicca per avanzare)"
-                class="w-7 h-7 -ml-1 rounded-lg flex items-center justify-center hover:bg-black/[0.05] dark:hover:bg-white/[0.07] shrink-0 transition">
-                ${stageRingSVG(l.stage)}
-              </button>
+            <button onclick="cycleStage(event, '${l.id}')" title="${STAGES[l.stage].label} — clicca per avanzare"
+              class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-black/[0.05] dark:hover:bg-white/[0.07] shrink-0 transition">
+              ${stageRingSVG(l.stage)}
+            </button>
 
-              <span class="hidden sm:inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md font-mono text-[11px] font-semibold shrink-0"
-                style="background:${c.tint}; color:${c.color}">
-                <span class="w-1.5 h-1.5 rounded-full" style="background:${c.color}"></span>
-                ${c.name}
-              </span>
-
-              <div class="min-w-0 flex-1">
-                <div class="flex items-center gap-2 flex-wrap">
-                  <span class="sm:hidden w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
-                  <span class="font-mono text-[12.5px] font-semibold tabular-nums">${formatDateReadable(l.date)}</span>
-                  <span class="px-2 py-0.5 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian text-[11px] text-[#52525B] dark:text-[#A1A1AA]">${escapeHtml(l.type)}</span>
-                  ${l.scheduled ? `
-                    <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 font-mono text-[11px] tabular-nums font-medium">
-                      Cal: ${formatScheduled(l.scheduled)}
-                    </span>` : ''}
-                  ${l.topic ? `<span class="text-[13px] text-[#52525B] dark:text-[#A1A1AA] truncate max-w-[260px] sm:max-w-[340px]">${escapeHtml(l.topic)}</span>` : ''}
-                </div>
-                <div class="md:hidden mt-0.5 font-mono text-[11px] tabular-nums text-[#8E8E93]">
-                  ${formatHours(effMin)} · ${STAGES[l.stage].label}
-                </div>
-              </div>
+            <!-- Date column -->
+            <div class="w-[52px] shrink-0 tabular-nums ${isDone ? 'opacity-50' : ''}">
+              <div class="text-[13px] font-semibold leading-tight">${l.date.slice(8)} ${month}</div>
+              <div class="text-[11.5px] leading-tight text-[#8E8E93] capitalize">${weekday}</div>
             </div>
 
-            <!-- Right: Effective Duration + Stage + Quick Actions -->
-            <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-              <div class="hidden md:flex flex-col items-end" title="Durata effettiva a 1x: ${formatHours(baseMin)}">
-                <span class="font-mono text-[12px] font-semibold tabular-nums">${formatHours(effMin)}</span>
-                <span class="text-[10.5px] text-[#8E8E93]">${STAGES[l.stage].label}</span>
-              </div>
+            <!-- Course column (desktop) -->
+            <div class="hidden sm:flex items-center gap-2 w-[96px] shrink-0 ${isDone ? 'opacity-50' : ''}">
+              <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+              <span class="text-[12.5px] font-semibold truncate">${c.name}</span>
+            </div>
 
-              <div class="flex items-center gap-1">
+            <!-- Type, topic, calendar slot -->
+            <div class="min-w-0 flex-1 ${isDone ? 'opacity-50' : ''}">
+              <div class="flex items-center gap-2 min-w-0">
+                <span class="sm:hidden w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
+                <span class="sm:hidden text-[12.5px] font-semibold shrink-0">${c.name}</span>
+                <span class="text-[13px] text-[#52525B] dark:text-[#A1A1AA] shrink-0 ${isDone ? 'line-through' : ''}">${escapeHtml(l.type)}</span>
+                ${l.topic ? `<span class="hidden sm:inline text-[13px] text-[#8E8E93] truncate">— ${escapeHtml(l.topic)}</span>` : ''}
+              </div>
+              ${l.scheduled ? `
+                <div class="mt-0.5 inline-flex items-center gap-1 text-[11.5px] tabular-nums font-medium text-emerald-700 dark:text-emerald-400">
+                  <svg class="w-3 h-3" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                  ${formatScheduled(l.scheduled)}
+                </div>` : ''}
+            </div>
+
+            <!-- Right: Effective Duration + Quick Actions -->
+            <div class="flex items-center gap-1 sm:gap-3 shrink-0">
+              <span class="text-[12.5px] font-medium tabular-nums text-[#52525B] dark:text-[#A1A1AA] w-[52px] text-right ${isDone ? 'opacity-50' : ''}" title="${formatHours(baseMin)} a velocità normale">${formatHours(effMin)}</span>
+
+              <div class="flex items-center gap-0.5 lg:opacity-40 lg:group-hover:opacity-100 transition">
                 ${l.url ? `
                   <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Apri registrazione"
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#111113] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
@@ -1507,13 +1505,13 @@
             ${slots.length === 0 ? `<div class="text-[11.5px] text-[#8E8E93] py-4 text-center">Nessuna lezione</div>` : slots.map(s => `
               <div class="rounded-lg bg-white dark:bg-cardDark border border-black/[0.07] dark:border-white/[0.07] p-2.5 space-y-2 shadow-sm">
                 <div class="flex items-center justify-between gap-1.5">
-                  <span class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold font-mono" style="color:${s.course.color}">
+                  <span class="inline-flex items-center gap-1.5 text-[11.5px] font-semibold" style="color:${s.course.color}">
                     <span class="w-2 h-2 rounded-full" style="background:${s.course.color}"></span>
                     ${s.course.name}
                   </span>
-                  <span class="font-mono text-[10.5px] text-[#8E8E93]">${s.room}</span>
+                  <span class="text-[10.5px] text-[#8E8E93]">${s.room}</span>
                 </div>
-                <div class="text-[11.5px] font-mono tabular-nums text-[#52525B] dark:text-[#A1A1AA]">
+                <div class="text-[11.5px] tabular-nums text-[#52525B] dark:text-[#A1A1AA]">
                   ${s.start}–${s.end}
                   <span class="text-[#8E8E93]">· eff. ${formatHours(s.duration)}</span>
                 </div>
@@ -1596,7 +1594,7 @@
         <span class="w-2.5 h-2.5 rounded-full shrink-0" style="background:${c.color}"></span>
         <span>${c.name}</span>
         <span class="text-[#8E8E93] font-normal">·</span>
-        <span class="font-mono text-[13px] font-medium tabular-nums text-[#52525B] dark:text-[#A1A1AA]">${formatDateReadable(l.date)}</span>
+        <span class="text-[13px] font-medium tabular-nums text-[#52525B] dark:text-[#A1A1AA]">${formatDateReadable(l.date)}</span>
       `;
 
       document.getElementById('drawerBody').innerHTML = `
@@ -1618,12 +1616,12 @@
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Data originale</label>
             <input id="edDate" type="date" value="${l.date}"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Durata effettiva (min)</label>
             <input id="edDuration" type="number" value="${l.duration || c.defaultDuration}" min="15" step="15"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] tabular-nums focus:outline-none" />
           </div>
         </div>
 
@@ -1651,7 +1649,7 @@
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Pianificata il</label>
             <input id="edScheduled" type="datetime-local" value="${l.scheduled || ''}"
-              class="w-full px-2.5 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12px] font-mono tabular-nums focus:outline-none" />
+              class="w-full px-2.5 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12px] tabular-nums focus:outline-none" />
           </div>
         </div>
 
@@ -1924,9 +1922,9 @@
               <div class="flex items-center gap-2 text-[13px] font-semibold">
                 <span class="w-2 h-2 rounded-full shrink-0" style="background:${c.color}"></span>
                 <span>${c.name}</span>
-                <span class="font-mono text-[12px] text-[#71717A] dark:text-[#8E8E93] tabular-nums">${formatDateReadable(l.date)}</span>
+                <span class="text-[12px] text-[#71717A] dark:text-[#8E8E93] tabular-nums">${formatDateReadable(l.date)}</span>
               </div>
-              <div class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] font-mono tabular-nums mt-0.5">
+              <div class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93] tabular-nums mt-0.5">
                 ${formatHours(l.eff)} a ${state.speed}x · ${escapeHtml(l.type)}
               </div>
             </div>
