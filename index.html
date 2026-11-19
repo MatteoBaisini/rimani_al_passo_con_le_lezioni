@@ -223,19 +223,27 @@
       <!-- Main Scroll Content -->
       <main class="flex-1 w-full max-w-[1060px] mx-auto px-4 sm:px-7 py-6 pb-20 space-y-6">
 
+        <!-- Next Up: the lesson to tackle first in the current scope -->
+        <section id="nextUpSection" class="hidden">
+          <!-- Populated by JS -->
+        </section>
+
         <!-- KPI Summary Strip + Overall Completion Progress -->
         <section class="space-y-3">
           <div id="kpiGrid" class="grid grid-cols-2 lg:grid-cols-4 gap-3">
             <!-- Populated by JS -->
           </div>
-          <!-- Sleek Completion Progress Bar -->
+          <!-- Stacked Progress Bar (one segment per stage) -->
           <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-xl px-4 py-3 shadow-card">
             <div class="flex items-center justify-between text-[11.5px] mb-2">
               <span class="font-medium text-[#52525B] dark:text-[#A1A1AA]">Avanzamento complessivo</span>
               <span id="overallPctText" class="font-mono font-semibold tabular-nums">0%</span>
             </div>
-            <div class="h-1.5 w-full rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden">
-              <div id="overallProgressBar" class="h-full rounded-full bg-[#111113] dark:bg-[#F4F4F5] transition-all duration-300" style="width: 0%"></div>
+            <div id="overallProgressBar" class="h-2 w-full rounded-full bg-black/[0.06] dark:bg-white/[0.08] overflow-hidden flex gap-px">
+              <!-- Populated by JS -->
+            </div>
+            <div id="stageLegend" class="mt-2.5 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-[#71717A] dark:text-[#8E8E93]">
+              <!-- Populated by JS -->
             </div>
           </div>
         </section>
@@ -269,13 +277,13 @@
               <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
             </svg>
             <input id="searchInput" type="search" placeholder="Cerca data, argomento, note..."
-              class="w-full pl-9 pr-3 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark text-[13px] placeholder:text-[#8E8E93] focus:outline-none focus:border-black/25 dark:focus:border-white/25 transition shadow-sm" />
+              class="peer w-full pl-9 pr-9 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark text-[13px] placeholder:text-[#8E8E93] focus:outline-none focus:border-black/25 dark:focus:border-white/25 transition shadow-sm" />
+            <kbd class="hidden sm:flex peer-focus:hidden absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 items-center justify-center rounded border border-black/[0.1] dark:border-white/[0.12] font-mono text-[10.5px] text-[#8E8E93]">/</kbd>
           </div>
         </section>
 
-        <!-- Lesson List Card -->
-        <section id="lessonList"
-          class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden divide-y divide-black/[0.06] dark:divide-white/[0.06]">
+        <!-- Lesson List, grouped by week -->
+        <section id="lessonList" class="space-y-4">
           <!-- Populated by JS -->
         </section>
       </main>
@@ -565,6 +573,9 @@
       { id: 2, label: 'Appunti OK' },
       { id: 3, label: 'Completata' }
     ];
+
+    // Same hues as stageRingSVG
+    const STAGE_COLORS = ['#A1A1AA', '#D97706', '#2563EB', '#16A34A'];
 
     const SPEED_OPTIONS = [1, 1.25, 1.5, 1.75, 2];
 
@@ -955,6 +966,7 @@
     function render() {
       renderSidebar();
       renderHeaderAndKPIs();
+      renderNextUp();
       renderCourseOverview();
       renderAnalisiBanner();
       renderFilterTabs();
@@ -1078,7 +1090,101 @@
       const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / 3), 0);
       const pct = total === 0 ? 100 : Math.round((weightedDone / total) * 100);
       document.getElementById('overallPctText').textContent = `${pct}% (${scopeDone.length}/${total})`;
-      document.getElementById('overallProgressBar').style.width = `${pct}%`;
+
+      // One segment per started stage (done first), "Da vedere" is the empty track
+      const stageCounts = STAGES.map(s => scopeLessons.filter(l => l.stage === s.id).length);
+      document.getElementById('overallProgressBar').innerHTML = total === 0 ? '' : [3, 2, 1]
+        .filter(s => stageCounts[s] > 0)
+        .map(s => `<div class="h-full transition-all duration-300" style="width:${(stageCounts[s] / total) * 100}%; background:${STAGE_COLORS[s]}" title="${STAGES[s].label}: ${stageCounts[s]}"></div>`)
+        .join('');
+      document.getElementById('stageLegend').innerHTML = STAGES.map(s => `
+        <span class="inline-flex items-center gap-1.5">
+          <span class="w-2 h-2 rounded-full" style="background:${STAGE_COLORS[s.id]}"></span>
+          ${s.label}
+          <span class="font-mono tabular-nums font-semibold text-[#111113] dark:text-[#F4F4F5]">${stageCounts[s.id]}</span>
+        </span>
+      `).join('');
+    }
+
+    // Priority: soonest calendar session, then already-started lessons, then the oldest backlog item
+    function getNextUp() {
+      const open = getScopedLessons()
+        .filter(l => l.stage < 3 && (ui.view !== 'scheduled' || l.scheduled))
+        .sort((a, b) => a.date.localeCompare(b.date));
+      const scheduled = open.filter(l => l.scheduled).sort((a, b) => a.scheduled.localeCompare(b.scheduled));
+      if (scheduled.length) return { lesson: scheduled[0], reason: `In calendario ${formatScheduled(scheduled[0].scheduled)}` };
+      const started = open.filter(l => l.stage > 0);
+      if (started.length) return { lesson: started[0], reason: `Già iniziata · ${STAGES[started[0].stage].label}` };
+      if (open.length) return { lesson: open[0], reason: `La più vecchia · ${daysAgoLabel(open[0].date)}` };
+      return null;
+    }
+
+    function daysAgoLabel(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      const diff = Math.round((today - new Date(y, m - 1, d)) / 86400000);
+      if (diff < 0) return `tra ${-diff} gg`;
+      if (diff === 0) return 'oggi';
+      if (diff === 1) return 'ieri';
+      return `${diff} giorni fa`;
+    }
+
+    function renderNextUp() {
+      const sec = document.getElementById('nextUpSection');
+      const next = ui.filter === 'done' ? null : getNextUp();
+      if (!next) {
+        sec.classList.add('hidden');
+        sec.innerHTML = '';
+        return;
+      }
+      sec.classList.remove('hidden');
+      const l = next.lesson;
+      const c = getCourse(l.courseId);
+      const effMin = effMinutes(l.duration || c.defaultDuration);
+      const nextStage = STAGES[l.stage + 1];
+
+      sec.innerHTML = `
+        <div class="relative bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden">
+          <div class="absolute inset-y-0 left-0 w-1" style="background:${c.color}"></div>
+          <div class="pl-5 pr-4 sm:pr-5 py-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div class="min-w-0 space-y-1.5">
+              <div class="flex items-center gap-2 text-[11px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">
+                Prossima da recuperare
+                <span class="normal-case tracking-normal font-medium font-mono tabular-nums">· ${escapeHtml(next.reason)}</span>
+              </div>
+              <div class="flex items-center gap-2 flex-wrap">
+                <span class="text-[17px] font-semibold tracking-tight">${c.fullName}</span>
+                <span class="px-2 py-0.5 rounded-md border border-black/[0.08] dark:border-white/[0.08] bg-porcelain dark:bg-obsidian text-[11px] text-[#52525B] dark:text-[#A1A1AA]">${escapeHtml(l.type)}</span>
+              </div>
+              <div class="flex items-center gap-3 font-mono text-[12px] tabular-nums text-[#52525B] dark:text-[#A1A1AA]">
+                <span>${formatDateReadable(l.date)}</span>
+                <span class="w-1 h-1 rounded-full bg-current opacity-40"></span>
+                <span class="font-semibold text-[#111113] dark:text-[#F4F4F5]">${formatHours(effMin)}</span>
+                <span>a ${state.speed}x</span>
+                ${l.topic ? `<span class="hidden sm:inline font-sans text-[12.5px] truncate max-w-[260px]">· ${escapeHtml(l.topic)}</span>` : ''}
+              </div>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+              ${l.url ? `
+                <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener"
+                  class="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
+                  <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
+                  Guarda
+                </a>` : `
+                <button onclick="openDrawer('${l.id}')"
+                  class="px-3 py-2 rounded-xl border border-black/[0.08] dark:border-white/[0.08] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
+                  Dettagli
+                </button>`}
+              <button onclick="cycleStage(event, '${l.id}')"
+                class="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
+                <span class="w-2 h-2 rounded-full" style="background:${STAGE_COLORS[nextStage.id]}"></span>
+                Segna "${nextStage.label}"
+              </button>
+            </div>
+          </div>
+        </div>
+      `;
     }
 
     function renderCourseOverview() {
@@ -1152,12 +1258,37 @@
     }
 
     function renderFilterTabs() {
+      const scope = getScopedLessons().filter(l => ui.view !== 'scheduled' || l.scheduled);
+      const labels = { open: 'Da recuperare', all: 'Tutte', done: 'Completate' };
+      const counts = {
+        open: scope.filter(l => l.stage < 3).length,
+        all: scope.length,
+        done: scope.filter(l => l.stage === 3).length
+      };
       document.querySelectorAll('#stageFilter button').forEach(btn => {
-        const active = btn.dataset.filter === ui.filter;
+        const f = btn.dataset.filter;
+        const active = f === ui.filter;
         btn.className = active
-          ? 'px-3 py-1.5 rounded-lg text-[12.5px] font-semibold bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm transition'
-          : 'px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white transition';
+          ? 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-semibold bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm transition'
+          : 'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[12.5px] font-medium text-[#71717A] dark:text-[#8E8E93] hover:text-[#111113] dark:hover:text-white transition';
+        btn.innerHTML = `${labels[f]}<span class="font-mono text-[10.5px] tabular-nums opacity-60">${counts[f]}</span>`;
       });
+    }
+
+    function weekStartIso(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      const dt = new Date(y, m - 1, d);
+      dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7));
+      return toIsoDate(dt);
+    }
+
+    function weekLabel(startIso) {
+      const thisWeek = weekStartIso(toIsoDate(new Date()));
+      const diffWeeks = Math.round((new Date(startIso) - new Date(thisWeek)) / (7 * 86400000));
+      if (diffWeeks === 0) return 'Questa settimana';
+      if (diffWeeks === -1) return 'Settimana scorsa';
+      if (diffWeeks === 1) return 'Prossima settimana';
+      return `Settimana del ${formatDateReadable(startIso).slice(4)}`;
     }
 
     function renderLessonList() {
@@ -1165,15 +1296,52 @@
       const items = getFilteredLessons();
 
       if (items.length === 0) {
+        const caughtUp = !ui.search && ui.filter === 'open';
         container.innerHTML = `
-          <div class="px-6 py-14 text-center text-[13px] text-[#71717A] dark:text-[#8E8E93]">
-            Nessuna lezione in questa vista.
+          <div class="bg-white dark:bg-cardDark border border-dashed border-black/[0.12] dark:border-white/[0.12] rounded-2xl px-6 py-12 text-center">
+            <div class="mx-auto w-10 h-10 rounded-full flex items-center justify-center ${caughtUp ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-black/[0.04] dark:bg-white/[0.06] text-[#8E8E93]'}">
+              ${caughtUp
+                ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>'
+                : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>'}
+            </div>
+            <div class="mt-3 text-[14px] font-semibold">${caughtUp ? 'Sei in pari' : 'Nessuna lezione trovata'}</div>
+            <div class="mt-1 text-[12.5px] text-[#71717A] dark:text-[#8E8E93]">
+              ${caughtUp ? 'Niente da recuperare in questa vista.' : ui.search ? `Nessun risultato per “${escapeHtml(ui.search)}”.` : 'Prova a cambiare filtro.'}
+            </div>
           </div>
         `;
         return;
       }
 
-      container.innerHTML = items.map(l => {
+      const groups = [];
+      items.forEach(l => {
+        const wk = weekStartIso(l.date);
+        let g = groups[groups.length - 1];
+        if (!g || g.week !== wk) groups.push(g = { week: wk, lessons: [] });
+        g.lessons.push(l);
+      });
+
+      container.innerHTML = groups.map(g => {
+        const openMins = g.lessons
+          .filter(l => l.stage < 3)
+          .reduce((s, l) => s + effMinutes(l.duration || getCourse(l.courseId).defaultDuration), 0);
+        return `
+          <div class="space-y-2">
+            <div class="px-1 flex items-baseline justify-between gap-3">
+              <h3 class="text-[12px] font-semibold uppercase tracking-wider text-[#71717A] dark:text-[#8E8E93]">${weekLabel(g.week)}</h3>
+              <span class="font-mono text-[11px] tabular-nums text-[#8E8E93]">
+                ${g.lessons.length} ${g.lessons.length === 1 ? 'lezione' : 'lezioni'}${openMins ? ` · ${formatHours(openMins)}` : ''}
+              </span>
+            </div>
+            <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden divide-y divide-black/[0.06] dark:divide-white/[0.06]">
+              ${g.lessons.map(lessonRowHtml).join('')}
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function lessonRowHtml(l) {
         const c = getCourse(l.courseId);
         const baseMin = l.duration || c.defaultDuration;
         const effMin = effMinutes(baseMin);
@@ -1207,6 +1375,9 @@
                     </span>` : ''}
                   ${l.topic ? `<span class="text-[13px] text-[#52525B] dark:text-[#A1A1AA] truncate max-w-[260px] sm:max-w-[340px]">${escapeHtml(l.topic)}</span>` : ''}
                 </div>
+                <div class="md:hidden mt-0.5 font-mono text-[11px] tabular-nums text-[#8E8E93]">
+                  ${formatHours(effMin)} · ${STAGES[l.stage].label}
+                </div>
               </div>
             </div>
 
@@ -1236,7 +1407,6 @@
             </div>
           </div>
         `;
-      }).join('');
     }
 
     // =========================================================================
@@ -1829,9 +1999,14 @@
 
     document.addEventListener('keydown', e => {
       if (e.key === 'Escape') closeAllOverlays();
-      if (e.key.toLowerCase() === 'n' && !['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName)) {
+      const typing = ['INPUT', 'TEXTAREA', 'SELECT'].includes(document.activeElement.tagName);
+      if (e.key.toLowerCase() === 'n' && !typing) {
         e.preventDefault();
         openAddModal();
+      }
+      if (e.key === '/' && !typing) {
+        e.preventDefault();
+        document.getElementById('searchInput').focus();
       }
     });
 
