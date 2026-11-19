@@ -1,0 +1,18 @@
+{
+  "name": "Recupero Lezioni — PoliMi",
+  "short_name": "Recuperi",
+  "description": "Tracker minimalista per il recupero lezioni universitarie con sync cloud e Google Calendar.",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#FBFBFB",
+  "theme_color": "#111113",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

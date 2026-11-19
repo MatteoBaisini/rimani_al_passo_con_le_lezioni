@@ -1,0 +1,1781 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Recupero Lezioni</title>
+  <meta name="theme-color" content="#111113" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="Recuperi" />
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" type="image/svg+xml" href="icon.svg" />
+  <link rel="apple-touch-icon" href="icon.svg" />
+  <script src="config.js"></script>
+  <style>
+    :root {
+      --bg: #FBFBFB;
+      --surface: #FFFFFF;
+      --surface-hover: #F4F4F5;
+      --surface-active: #EFEFF1;
+      --border: #E5E5E7;
+      --border-subtle: #EFEFF1;
+      --text: #111113;
+      --text-secondary: #52525B;
+      --text-muted: #8E8E93;
+      --accent: #111113;
+      --accent-text: #FFFFFF;
+      --danger: #DC2626;
+      --success: #059669;
+      --warning: #D97706;
+      --radius: 8px;
+      --radius-lg: 12px;
+      --shadow: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 2px 6px rgba(0,0,0,0.04);
+      --font: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+      --mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas, monospace;
+    }
+
+    [data-theme="dark"] {
+      --bg: #0D0D0F;
+      --surface: #141417;
+      --surface-hover: #1C1C21;
+      --surface-active: #232329;
+      --border: #26262C;
+      --border-subtle: #1D1D22;
+      --text: #F4F4F5;
+      --text-secondary: #A1A1AA;
+      --text-muted: #71717A;
+      --accent: #F4F4F5;
+      --accent-text: #0D0D0F;
+      --danger: #F87171;
+      --success: #34D399;
+      --warning: #FBBF24;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow-lg: 0 16px 40px rgba(0,0,0,0.5);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font);
+      font-size: 14px;
+      line-height: 1.45;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    button, input, select, textarea {
+      font-family: inherit;
+      font-size: inherit;
+      color: inherit;
+    }
+
+    .app {
+      display: grid;
+      grid-template-columns: 260px 1fr;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      background: var(--surface);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      padding: 16px 12px;
+      position: sticky;
+      top: 0;
+      height: 100vh;
+      overflow-y: auto;
+      z-index: 30;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 8px 16px;
+    }
+    .brand-title {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      letter-spacing: -0.01em;
+    }
+    .brand-mark {
+      width: 20px;
+      height: 20px;
+      border-radius: 5px;
+      background: var(--accent);
+      color: var(--accent-text);
+      display: grid;
+      place-items: center;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .nav-section-label {
+      font-size: 11px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--text-muted);
+      padding: 12px 10px 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      padding: 7px 10px;
+      border: none;
+      background: transparent;
+      border-radius: 7px;
+      cursor: pointer;
+      color: var(--text-secondary);
+      transition: background 0.12s, color 0.12s;
+      text-align: left;
+    }
+    .nav-item:hover { background: var(--surface-hover); color: var(--text); }
+    .nav-item.active { background: var(--surface-active); color: var(--text); font-weight: 500; }
+    .nav-left { display: flex; align-items: center; gap: 9px; min-width: 0; }
+    .nav-left span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .count {
+      font-family: var(--mono);
+      font-size: 11px;
+      color: var(--text-muted);
+      padding: 1px 6px;
+      border-radius: 99px;
+      background: var(--bg);
+    }
+
+    .sidebar-controls {
+      margin-top: auto;
+      padding-top: 14px;
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .control-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+    }
+    .control-row select, .control-row input[type="number"] {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 3px 6px;
+      font-size: 12px;
+      font-family: var(--mono);
+      width: 72px;
+      text-align: right;
+    }
+
+    .sync-pill {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 8px 10px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      cursor: pointer;
+      font-size: 12px;
+      transition: border-color 0.15s;
+    }
+    .sync-pill:hover { border-color: var(--text-muted); }
+    .sync-status { display: flex; align-items: center; gap: 7px; }
+    .sync-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text-muted); }
+    .sync-dot.ok { background: var(--success); }
+    .sync-dot.busy { background: var(--warning); }
+    .sync-dot.err { background: var(--danger); }
+
+    /* Main */
+    .main {
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+
+    .topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 14px 28px;
+      border-bottom: 1px solid var(--border);
+      background: var(--surface);
+      position: sticky;
+      top: 0;
+      z-index: 20;
+    }
+    .topbar-left { display: flex; align-items: center; gap: 12px; min-width: 0; }
+    .mobile-menu-btn {
+      display: none;
+      background: transparent;
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      width: 34px;
+      height: 34px;
+      place-items: center;
+      cursor: pointer;
+    }
+    .view-title { font-size: 16px; font-weight: 600; letter-spacing: -0.015em; }
+    .topbar-actions { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 7px 12px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.12s, border-color 0.12s;
+      white-space: nowrap;
+    }
+    .btn:hover { background: var(--surface-hover); }
+    .btn-primary {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+    }
+    .btn-primary:hover { opacity: 0.9; background: var(--accent); }
+    .btn-ghost { border-color: transparent; background: transparent; padding: 6px 8px; }
+    .btn-ghost:hover { background: var(--surface-hover); }
+    .btn-danger { color: var(--danger); }
+
+    .content {
+      padding: 24px 28px 64px;
+      max-width: 1040px;
+      width: 100%;
+    }
+
+    /* Metrics strip */
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+    .metric-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 14px 16px;
+      box-shadow: var(--shadow);
+    }
+    .metric-label { font-size: 12px; color: var(--text-muted); margin-bottom: 6px; }
+    .metric-value {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      font-family: var(--mono);
+    }
+    .metric-sub { font-size: 11px; color: var(--text-secondary); margin-top: 3px; }
+
+    /* Analisi banner */
+    .banner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 14px 18px;
+      border-radius: var(--radius-lg);
+      border: 1px solid var(--border);
+      background: var(--surface);
+      margin-bottom: 18px;
+    }
+    .banner-text h3 { font-size: 14px; font-weight: 600; margin-bottom: 2px; }
+    .banner-text p { font-size: 12.5px; color: var(--text-secondary); }
+
+    /* Filter bar */
+    .toolbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
+    }
+    .segmented {
+      display: inline-flex;
+      background: var(--surface-hover);
+      padding: 3px;
+      border-radius: 8px;
+      border: 1px solid var(--border-subtle);
+    }
+    .seg-btn {
+      border: none;
+      background: transparent;
+      padding: 4px 10px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      font-weight: 500;
+    }
+    .seg-btn.active {
+      background: var(--surface);
+      color: var(--text);
+      box-shadow: var(--shadow);
+    }
+
+    .search-input {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 6px 10px;
+      font-size: 13px;
+      width: 220px;
+      outline: none;
+    }
+    .search-input:focus { border-color: var(--text-muted); }
+
+    /* Lesson List */
+    .list-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .lesson-row {
+      display: grid;
+      grid-template-columns: 32px 72px 1fr auto auto;
+      align-items: center;
+      gap: 12px;
+      padding: 11px 16px;
+      border-bottom: 1px solid var(--border-subtle);
+      cursor: pointer;
+      transition: background 0.1s;
+    }
+    .lesson-row:last-child { border-bottom: none; }
+    .lesson-row:hover { background: var(--surface-hover); }
+    .lesson-row.done { opacity: 0.55; }
+
+    .status-btn {
+      width: 24px;
+      height: 24px;
+      border-radius: 6px;
+      border: none;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--text-muted);
+    }
+    .status-btn:hover { background: var(--surface-active); color: var(--text); }
+
+    .course-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      font-weight: 600;
+      font-family: var(--mono);
+      color: var(--text-secondary);
+    }
+
+    .lesson-main { min-width: 0; }
+    .lesson-title-line {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .lesson-date {
+      font-family: var(--mono);
+      font-size: 12.5px;
+      font-weight: 500;
+      color: var(--text);
+    }
+    .lesson-topic {
+      font-size: 13px;
+      color: var(--text-secondary);
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      max-width: 360px;
+    }
+    .pill {
+      font-size: 11px;
+      padding: 1px 7px;
+      border-radius: 99px;
+      border: 1px solid var(--border);
+      color: var(--text-secondary);
+      background: var(--bg);
+      white-space: nowrap;
+    }
+    .pill.cal {
+      border-color: rgba(5,150,105,0.3);
+      color: var(--success);
+      background: rgba(5,150,105,0.06);
+    }
+
+    .lesson-meta {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-family: var(--mono);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .stage-label {
+      font-family: var(--font);
+      font-size: 11.5px;
+      color: var(--text-secondary);
+      min-width: 78px;
+      text-align: right;
+    }
+
+    .row-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+    .icon-btn {
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      border: 1px solid transparent;
+      background: transparent;
+      display: grid;
+      place-items: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .icon-btn:hover { background: var(--surface-active); color: var(--text); border-color: var(--border); }
+
+    .empty-state {
+      padding: 48px 20px;
+      text-align: center;
+      color: var(--text-muted);
+      font-size: 13px;
+    }
+
+    /* Slide-over Drawer */
+    .overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.35);
+      backdrop-filter: blur(2px);
+      z-index: 40;
+      display: none;
+    }
+    .overlay.open { display: block; }
+
+    .drawer {
+      position: fixed;
+      top: 0;
+      right: 0;
+      height: 100vh;
+      width: 420px;
+      max-width: 100vw;
+      background: var(--surface);
+      border-left: 1px solid var(--border);
+      box-shadow: var(--shadow-lg);
+      z-index: 50;
+      transform: translateX(100%);
+      transition: transform 0.2s ease;
+      display: flex;
+      flex-direction: column;
+    }
+    .drawer.open { transform: translateX(0); }
+    .drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+    .drawer-body {
+      padding: 20px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+    .drawer-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .field { display: flex; flex-direction: column; gap: 6px; }
+    .field label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .field input, .field select, .field textarea {
+      width: 100%;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 7px;
+      padding: 8px 10px;
+      outline: none;
+    }
+    .field input:focus, .field select:focus, .field textarea:focus { border-color: var(--text-muted); }
+    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+    .stage-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 6px;
+    }
+    .stage-chip {
+      padding: 7px 6px;
+      border-radius: 7px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 11.5px;
+      text-align: center;
+      cursor: pointer;
+      color: var(--text-secondary);
+    }
+    .stage-chip.active {
+      background: var(--accent);
+      color: var(--accent-text);
+      border-color: var(--accent);
+      font-weight: 500;
+    }
+
+    /* Modals */
+    .modal {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%) scale(0.98);
+      width: 480px;
+      max-width: calc(100vw - 24px);
+      max-height: 90vh;
+      overflow-y: auto;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+      z-index: 60;
+      display: none;
+    }
+    .modal.open { display: block; transform: translate(-50%, -50%) scale(1); }
+    .modal-header {
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .modal-header h2 { font-size: 15px; font-weight: 600; }
+    .modal-body { padding: 18px 20px; display: flex; flex-direction: column; gap: 14px; }
+    .modal-footer {
+      padding: 14px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+
+    .chip-row { display: flex; flex-wrap: wrap; gap: 6px; }
+    .chip {
+      padding: 5px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--bg);
+      font-size: 12px;
+      cursor: pointer;
+    }
+    .chip:hover { border-color: var(--text-muted); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--accent);
+      color: var(--accent-text);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      box-shadow: var(--shadow-lg);
+      z-index: 100;
+      opacity: 0;
+      transform: translateY(8px);
+      transition: all 0.2s;
+      pointer-events: none;
+    }
+    .toast.show { opacity: 1; transform: translateY(0); }
+
+    .help-box {
+      font-size: 12px;
+      color: var(--text-secondary);
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+      line-height: 1.5;
+    }
+    .help-box code {
+      font-family: var(--mono);
+      font-size: 11px;
+      background: var(--surface-hover);
+      padding: 1px 4px;
+      border-radius: 4px;
+    }
+
+    /* Mobile / iPad Responsive */
+    @media (max-width: 860px) {
+      .app { grid-template-columns: 1fr; }
+      .sidebar {
+        position: fixed;
+        left: 0;
+        top: 0;
+        width: 270px;
+        transform: translateX(-100%);
+        transition: transform 0.2s ease;
+        box-shadow: var(--shadow-lg);
+      }
+      .sidebar.open { transform: translateX(0); }
+      .mobile-menu-btn { display: grid; }
+      .topbar { padding: 12px 16px; padding-top: max(12px, env(safe-area-inset-top)); }
+      .content { padding: 16px 14px 80px; }
+      .metrics { grid-template-columns: repeat(2, 1fr); gap: 8px; }
+      .metric-value { font-size: 18px; }
+      .lesson-row {
+        grid-template-columns: 28px 1fr auto;
+        gap: 8px;
+        padding: 11px 12px;
+      }
+      .course-tag { display: none; }
+      .lesson-meta { display: none; }
+      .search-input { width: 100%; }
+      .banner { flex-direction: column; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+      <div class="brand">
+        <div class="brand-title">
+          <div class="brand-mark">R</div>
+          <span>Recupero Lezioni</span>
+        </div>
+        <button class="icon-btn" id="themeBtn" title="Cambia tema" aria-label="Cambia tema"></button>
+      </div>
+
+      <button class="nav-item active" data-view="all">
+        <span class="nav-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="7" y1="9" x2="17" y2="9"/><line x1="7" y1="13" x2="17" y2="13"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
+          <span>Tutte le lezioni</span>
+        </span>
+        <span class="count" id="cnt-all">0</span>
+      </button>
+
+      <button class="nav-item" data-view="scheduled">
+        <span class="nav-left">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+          <span>Pianificate</span>
+        </span>
+        <span class="count" id="cnt-scheduled">0</span>
+      </button>
+
+      <div class="nav-section-label">Materie</div>
+      <div id="courseNav"></div>
+
+      <div class="sidebar-controls">
+        <div class="control-row">
+          <span>Velocità video</span>
+          <select id="speedSelect">
+            <option value="1">1.0x</option>
+            <option value="1.25">1.25x</option>
+            <option value="1.5">1.5x</option>
+            <option value="1.75">1.75x</option>
+            <option value="2">2.0x</option>
+          </select>
+        </div>
+        <div class="control-row">
+          <span>Ore/giorno</span>
+          <input type="number" id="dailyHoursInput" min="0.5" max="12" step="0.5" value="2" />
+        </div>
+        <button class="sync-pill" id="openSyncBtn">
+          <span class="sync-status">
+            <span class="sync-dot" id="syncDot"></span>
+            <span id="syncLabel">Solo locale</span>
+          </span>
+          <span style="font-size:11px;color:var(--text-muted)">Config</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- Main -->
+    <main class="main">
+      <header class="topbar">
+        <div class="topbar-left">
+          <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+          </button>
+          <h1 class="view-title" id="viewTitle">Tutte le lezioni</h1>
+        </div>
+        <div class="topbar-actions">
+          <button class="btn" id="smartPickBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            Ho X min
+          </button>
+          <button class="btn btn-primary" id="addLessonBtn">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Nuova
+          </button>
+        </div>
+      </header>
+
+      <div class="content">
+        <section class="metrics" id="metrics"></section>
+        <div id="specialBanner"></div>
+
+        <div class="toolbar">
+          <div class="segmented" id="stageFilter">
+            <button class="seg-btn active" data-filter="open">Da recuperare</button>
+            <button class="seg-btn" data-filter="all">Tutte</button>
+            <button class="seg-btn" data-filter="done">Completate</button>
+          </div>
+          <input class="search-input" id="searchInput" type="search" placeholder="Cerca data, argomento..." />
+        </div>
+
+        <div class="list-card" id="lessonList"></div>
+      </div>
+    </main>
+  </div>
+
+  <!-- Overlay -->
+  <div class="overlay" id="overlay"></div>
+
+  <!-- Lesson Detail Drawer -->
+  <aside class="drawer" id="drawer">
+    <div class="drawer-header">
+      <div style="display:flex;align-items:center;gap:8px;font-weight:600" id="drawerHeading">Dettaglio lezione</div>
+      <button class="icon-btn" id="closeDrawerBtn" aria-label="Chiudi">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="drawer-body" id="drawerBody"></div>
+    <div class="drawer-footer">
+      <button class="btn btn-ghost btn-danger" id="deleteLessonBtn">Elimina</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn" id="drawerCalBtn">Google Calendar</button>
+        <button class="btn btn-primary" id="saveDrawerBtn">Salva</button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Add Lesson Modal -->
+  <div class="modal" id="addModal">
+    <div class="modal-header">
+      <h2>Aggiungi lezione</h2>
+      <button class="icon-btn" data-close-modal="addModal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field-row">
+        <div class="field">
+          <label>Materia</label>
+          <select id="addCourse"></select>
+        </div>
+        <div class="field">
+          <label>Tipo</label>
+          <select id="addType">
+            <option value="Lezione">Lezione</option>
+            <option value="Esercitazione">Esercitazione</option>
+            <option value="Laboratorio">Laboratorio</option>
+          </select>
+        </div>
+      </div>
+      <div class="field-row">
+        <div class="field">
+          <label>Data originale</label>
+          <input type="date" id="addDate" />
+        </div>
+        <div class="field">
+          <label>Durata (minuti)</label>
+          <input type="number" id="addDuration" value="120" min="15" step="15" />
+        </div>
+      </div>
+      <div class="field">
+        <label>Argomento (opzionale)</label>
+        <input type="text" id="addTopic" placeholder="es. Teorema di Green, Pipeline MIPS..." />
+      </div>
+      <div class="field">
+        <label>Link registrazione (opzionale)</label>
+        <input type="url" id="addUrl" placeholder="https://..." />
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" data-close-modal="addModal">Annulla</button>
+      <button class="btn btn-primary" id="confirmAddBtn">Aggiungi</button>
+    </div>
+  </div>
+
+  <!-- Google Calendar Modal -->
+  <div class="modal" id="calModal">
+    <div class="modal-header">
+      <h2>Pianifica su Google Calendar</h2>
+      <button class="icon-btn" data-close-modal="calModal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div id="calLessonSummary" style="font-size:13px;font-weight:500"></div>
+      <div class="chip-row" id="calQuickChips"></div>
+      <div class="field-row">
+        <div class="field">
+          <label>Giorno</label>
+          <input type="date" id="calDate" />
+        </div>
+        <div class="field">
+          <label>Ora inizio</label>
+          <input type="time" id="calTime" value="15:00" />
+        </div>
+      </div>
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;cursor:pointer">
+        <input type="checkbox" id="calBuffer" checked />
+        <span>Aggiungi +15 min di margine per appunti</span>
+      </label>
+      <div class="help-box" id="calDurationInfo"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn" id="downloadIcsBtn">Scarica .ics</button>
+      <button class="btn btn-primary" id="openGcalBtn">Apri Google Calendar</button>
+    </div>
+  </div>
+
+  <!-- Smart Pick Modal -->
+  <div class="modal" id="smartModal">
+    <div class="modal-header">
+      <h2>Ho X minuti liberi</h2>
+      <button class="icon-btn" data-close-modal="smartModal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="field">
+        <label>Quanto tempo hai adesso? (minuti)</label>
+        <input type="number" id="smartMinutes" value="90" min="30" max="360" step="15" />
+      </div>
+      <div class="chip-row">
+        <button class="chip" data-mins="60">60 min</button>
+        <button class="chip" data-mins="90">90 min</button>
+        <button class="chip" data-mins="120">2 ore</button>
+        <button class="chip" data-mins="150">2h 30m</button>
+      </div>
+      <div id="smartResults" style="display:flex;flex-direction:column;gap:8px;margin-top:4px"></div>
+    </div>
+  </div>
+
+  <!-- Sync & Backup Modal -->
+  <div class="modal" id="syncModal">
+    <div class="modal-header">
+      <h2>Cloud Sync & Backup (€0)</h2>
+      <button class="icon-btn" data-close-modal="syncModal">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
+    <div class="modal-body">
+      <div class="help-box">
+        Collega un progetto gratuito su <strong>Supabase</strong> (tabella <code>study_state</code> via <code>supabase_setup.sql</code>) per sincronizzare automaticamente PC, iPad e iPhone. Puoi salvare le credenziali qui o direttamente in <code>config.js</code> prima del push su GitHub Pages.
+      </div>
+      <div class="field">
+        <label>Supabase Project URL</label>
+        <input type="url" id="sbUrl" placeholder="https://xxxxxxxx.supabase.co" />
+      </div>
+      <div class="field">
+        <label>Supabase Anon Public Key</label>
+        <input type="password" id="sbKey" placeholder="eyJhbGciOi..." />
+      </div>
+      <div class="field">
+        <label>Chiave Sync Personale (SYNC_KEY)</label>
+        <input type="text" id="sbSyncKey" placeholder="matteo-polimi-2026" />
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" id="saveSyncBtn">Salva e Sincronizza</button>
+        <button class="btn" id="forcePullBtn">Scarica dal Cloud</button>
+        <button class="btn" id="forcePushBtn">Invia al Cloud</button>
+      </div>
+      <hr style="border:none;border-top:1px solid var(--border)" />
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap">
+        <span style="font-size:12px;color:var(--text-secondary)">Backup manuale JSON</span>
+        <div style="display:flex;gap:8px">
+          <button class="btn" id="exportJsonBtn">Esporta</button>
+          <label class="btn" style="cursor:pointer">
+            Importa
+            <input type="file" id="importJsonInput" accept="application/json" hidden />
+          </label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+
+  <script>
+    const STAGES = [
+      { id: 0, label: 'Da vedere' },
+      { id: 1, label: 'Vista' },
+      { id: 2, label: 'Appunti OK' },
+      { id: 3, label: 'Completata' }
+    ];
+
+    const COURSES = [
+      {
+        id: 'ACSO',
+        name: 'ACSO',
+        fullName: 'Architettura dei Calcolatori e Sistemi Operativi',
+        color: '#EAB308',
+        schedule: [
+          { dow: 2, duration: 180, type: 'Lezione' },
+          { dow: 4, duration: 180, type: 'Lezione' },
+          { dow: 5, duration: 180, type: 'Lezione' }
+        ]
+      },
+      {
+        id: 'ONDE',
+        name: 'ONDE',
+        fullName: 'Onde Elettromagnetiche e Mezzi Trasmissivi',
+        color: '#F97316',
+        schedule: [
+          { dow: 3, duration: 120, type: 'Lezione' },
+          { dow: 4, duration: 120, type: 'Lezione' }
+        ]
+      },
+      {
+        id: 'LEA',
+        name: 'LEA',
+        fullName: 'Logica e Algebra',
+        color: '#EC4899',
+        schedule: [
+          { dow: 2, duration: 120, type: 'Lezione' },
+          { dow: 5, duration: 120, type: 'Esercitazione' }
+        ]
+      },
+      {
+        id: 'ANALISI2',
+        name: 'ANALISI II',
+        fullName: 'Analisi Matematica 2',
+        color: '#22C55E',
+        schedule: [
+          { dow: 2, duration: 120, type: 'Lezione' },
+          { dow: 4, duration: 180, type: 'Lezione' },
+          { dow: 5, duration: 180, type: 'Lezione' }
+        ]
+      }
+    ];
+
+    const DEFAULT_LESSONS = [
+      { id: 'acso-2026-11-19', courseId: 'ACSO', date: '2026-11-19', type: 'Lezione', duration: 180, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-11', courseId: 'ONDE', date: '2026-11-11', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-12', courseId: 'ONDE', date: '2026-11-12', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-18', courseId: 'ONDE', date: '2026-11-18', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'onde-2026-11-19', courseId: 'ONDE', date: '2026-11-19', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-10', courseId: 'LEA', date: '2026-10-10', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-16', courseId: 'LEA', date: '2026-10-16', type: 'Esercitazione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-23', courseId: 'LEA', date: '2026-10-23', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-10-27', courseId: 'LEA', date: '2026-10-27', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-03', courseId: 'LEA', date: '2026-11-03', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-06', courseId: 'LEA', date: '2026-11-06', type: 'Lezione', duration: 120, stage: 0, topic: '', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-10', courseId: 'LEA', date: '2026-11-10', type: 'Lezione', duration: 120, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-13', courseId: 'LEA', date: '2026-11-13', type: 'Esercitazione', duration: 120, stage: 0, topic: 'Settimana scorsa', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-17', courseId: 'LEA', date: '2026-11-17', type: 'Lezione', duration: 120, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' },
+      { id: 'lea-2026-11-20', courseId: 'LEA', date: '2026-11-20', type: 'Esercitazione', duration: 120, stage: 0, topic: 'Settimana corrente', url: '', notes: '', scheduled: '' }
+    ];
+
+    const STORAGE_KEY = 'recupero_lezioni_state_v2';
+    const SYNC_CFG_KEY = 'recupero_lezioni_sync_cfg_v1';
+
+    let state = loadState();
+    let ui = {
+      view: 'all',
+      filter: 'open',
+      search: '',
+      activeLessonId: null,
+      calLessonId: null
+    };
+    let syncTimer = null;
+
+    function loadState() {
+      try {
+        const raw = localStorage.getItem(STORAGE_KEY);
+        if (raw) return JSON.parse(raw);
+      } catch (e) {}
+      return {
+        lessons: DEFAULT_LESSONS,
+        speed: 1.25,
+        dailyHours: 2,
+        theme: 'light',
+        updatedAt: new Date().toISOString()
+      };
+    }
+
+    function getSyncConfig() {
+      let local = {};
+      try { local = JSON.parse(localStorage.getItem(SYNC_CFG_KEY) || '{}'); } catch (e) {}
+      const fileCfg = window.APP_CONFIG || {};
+      return {
+        url: (local.url || fileCfg.SUPABASE_URL || '').trim().replace(/\/$/, ''),
+        key: (local.key || fileCfg.SUPABASE_ANON_KEY || '').trim(),
+        syncKey: (local.syncKey || fileCfg.SYNC_KEY || '').trim()
+      };
+    }
+
+    function saveState(skipCloud = false) {
+      state.updatedAt = new Date().toISOString();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+      render();
+      if (!skipCloud) scheduleCloudPush();
+    }
+
+    function scheduleCloudPush() {
+      const cfg = getSyncConfig();
+      if (!cfg.url || !cfg.key || !cfg.syncKey) return;
+      clearTimeout(syncTimer);
+      setSyncUI('busy', 'Salvataggio...');
+      syncTimer = setTimeout(() => pushToSupabase(true), 800);
+    }
+
+    function setSyncUI(status, text) {
+      const dot = document.getElementById('syncDot');
+      const label = document.getElementById('syncLabel');
+      dot.className = 'sync-dot ' + (status || '');
+      label.textContent = text;
+    }
+
+    async function pushToSupabase(silent = false) {
+      const cfg = getSyncConfig();
+      if (!cfg.url || !cfg.key || !cfg.syncKey) {
+        if (!silent) toast('Inserisci URL, Anon Key e Sync Key');
+        return;
+      }
+      setSyncUI('busy', 'Invio...');
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/study_state?on_conflict=sync_key`, {
+          method: 'POST',
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'resolution=merge-duplicates'
+          },
+          body: JSON.stringify({
+            sync_key: cfg.syncKey,
+            payload: state,
+            updated_at: state.updatedAt
+          })
+        });
+        if (!res.ok) throw new Error(await res.text());
+        setSyncUI('ok', 'Sincronizzato');
+        if (!silent) toast('Dati salvati sul cloud');
+      } catch (err) {
+        console.error(err);
+        setSyncUI('err', 'Errore sync');
+        if (!silent) toast('Errore sync: controlla credenziali o SQL');
+      }
+    }
+
+    async function pullFromSupabase(silent = false) {
+      const cfg = getSyncConfig();
+      if (!cfg.url || !cfg.key || !cfg.syncKey) {
+        setSyncUI('', 'Solo locale');
+        return;
+      }
+      setSyncUI('busy', 'Verifica...');
+      try {
+        const res = await fetch(`${cfg.url}/rest/v1/study_state?sync_key=eq.${encodeURIComponent(cfg.syncKey)}&select=payload,updated_at`, {
+          headers: {
+            'apikey': cfg.key,
+            'Authorization': `Bearer ${cfg.key}`
+          }
+        });
+        if (!res.ok) throw new Error(await res.text());
+        const rows = await res.json();
+        if (rows.length === 0) {
+          await pushToSupabase(true);
+          return;
+        }
+        const remote = rows[0].payload;
+        if (remote && (!state.updatedAt || new Date(remote.updatedAt) > new Date(state.updatedAt))) {
+          state = remote;
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+          applyTheme();
+          render();
+          if (!silent) toast('Aggiornato dal cloud');
+        } else if (!silent) {
+          toast('Già aggiornato');
+        }
+        setSyncUI('ok', 'Sincronizzato');
+      } catch (err) {
+        console.error(err);
+        setSyncUI('err', 'Offline / Errore');
+        if (!silent) toast('Impossibile leggere dal cloud');
+      }
+    }
+
+    // Helpers
+    function getCourse(id) { return COURSES.find(c => c.id === id) || COURSES[0]; }
+    function effMinutes(mins) { return Math.round(mins / (state.speed || 1.25)); }
+    function formatHours(mins) {
+      const h = Math.floor(mins / 60);
+      const m = mins % 60;
+      if (h === 0) return `${m}m`;
+      return m === 0 ? `${h}h` : `${h}h ${m}m`;
+    }
+    function formatDateIT(iso) {
+      if (!iso) return '—';
+      const [y, m, d] = iso.split('-');
+      return `${d}/${m}`;
+    }
+    function formatScheduled(str) {
+      if (!str) return '';
+      const [date, time] = str.split('T');
+      return `${formatDateIT(date)} ${time || ''}`.trim();
+    }
+    function toast(msg) {
+      const el = document.getElementById('toast');
+      el.textContent = msg;
+      el.classList.add('show');
+      setTimeout(() => el.classList.remove('show'), 2400);
+    }
+    function applyTheme() {
+      document.documentElement.setAttribute('data-theme', state.theme === 'dark' ? 'dark' : 'light');
+      const btn = document.getElementById('themeBtn');
+      btn.innerHTML = state.theme === 'dark'
+        ? '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>'
+        : '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>';
+    }
+
+    function stageIcon(stage) {
+      if (stage === 0) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/></svg>';
+      if (stage === 1) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#D97706" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 0 1 0 18z" fill="#D97706"/></svg>';
+      if (stage === 2) return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#2563EB" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3a9 9 0 1 1-9 9h9z" fill="#2563EB"/></svg>';
+      return '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#059669" stroke-width="2.2"><circle cx="12" cy="12" r="9" fill="#059669" stroke="#059669"/><polyline points="8.5 12.5 11 15 16 9.5" stroke="#fff"/></svg>';
+    }
+
+    function getFilteredLessons() {
+      return state.lessons
+        .filter(l => {
+          if (ui.view === 'scheduled') return !!l.scheduled && l.stage < 3;
+          if (ui.view !== 'all' && l.courseId !== ui.view) return false;
+          return true;
+        })
+        .filter(l => {
+          if (ui.filter === 'open') return l.stage < 3;
+          if (ui.filter === 'done') return l.stage === 3;
+          return true;
+        })
+        .filter(l => {
+          if (!ui.search) return true;
+          const q = ui.search.toLowerCase();
+          return (
+            l.date.includes(q) ||
+            formatDateIT(l.date).includes(q) ||
+            (l.topic || '').toLowerCase().includes(q) ||
+            (l.notes || '').toLowerCase().includes(q) ||
+            l.courseId.toLowerCase().includes(q) ||
+            l.type.toLowerCase().includes(q)
+          );
+        })
+        .sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function render() {
+      document.getElementById('speedSelect').value = String(state.speed);
+      document.getElementById('dailyHoursInput').value = state.dailyHours;
+
+      // Sidebar counts
+      const openAll = state.lessons.filter(l => l.stage < 3);
+      document.getElementById('cnt-all').textContent = openAll.length;
+      document.getElementById('cnt-scheduled').textContent = openAll.filter(l => l.scheduled).length;
+
+      const courseNav = document.getElementById('courseNav');
+      courseNav.innerHTML = COURSES.map(c => {
+        const cnt = openAll.filter(l => l.courseId === c.id).length;
+        return `
+          <button class="nav-item ${ui.view === c.id ? 'active' : ''}" data-view="${c.id}">
+            <span class="nav-left">
+              <span class="dot" style="background:${c.color}"></span>
+              <span>${c.name}</span>
+            </span>
+            <span class="count">${cnt}</span>
+          </button>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.nav-item').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.view === ui.view);
+        btn.onclick = () => {
+          ui.view = btn.dataset.view;
+          closeMobileSidebar();
+          render();
+        };
+      });
+
+      // Title
+      const titleEl = document.getElementById('viewTitle');
+      if (ui.view === 'all') titleEl.textContent = 'Tutte le lezioni';
+      else if (ui.view === 'scheduled') titleEl.textContent = 'Pianificate su Calendar';
+      else titleEl.textContent = getCourse(ui.view).fullName;
+
+      // Metrics
+      const scopeLessons = ui.view === 'all' || ui.view === 'scheduled'
+        ? state.lessons
+        : state.lessons.filter(l => l.courseId === ui.view);
+      const scopeOpen = scopeLessons.filter(l => l.stage < 3);
+      const scopeDone = scopeLessons.filter(l => l.stage === 3);
+      const rawMins = scopeOpen.reduce((s, l) => s + (l.duration || 120), 0);
+      const realMins = scopeOpen.reduce((s, l) => s + effMinutes(l.duration || 120), 0);
+      const daysNeeded = realMins > 0 ? Math.ceil((realMins / 60) / (state.dailyHours || 2)) : 0;
+      const targetDate = new Date();
+      targetDate.setDate(targetDate.getDate() + daysNeeded);
+      const targetStr = daysNeeded === 0 ? 'In pari' : targetDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+
+      document.getElementById('metrics').innerHTML = `
+        <div class="metric-card">
+          <div class="metric-label">Arretrate</div>
+          <div class="metric-value">${scopeOpen.length}</div>
+          <div class="metric-sub">${scopeDone.length} completate</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Ore effettive (${state.speed}x)</div>
+          <div class="metric-value">${formatHours(realMins)}</div>
+          <div class="metric-sub">${formatHours(rawMins)} reali a 1x</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Pareggio stimato</div>
+          <div class="metric-value">${targetStr}</div>
+          <div class="metric-sub">${daysNeeded} gg a ${state.dailyHours}h/giorno</div>
+        </div>
+        <div class="metric-card">
+          <div class="metric-label">Pianificate</div>
+          <div class="metric-value">${scopeOpen.filter(l => l.scheduled).length}</div>
+          <div class="metric-sub">su ${scopeOpen.length} aperte</div>
+        </div>
+      `;
+
+      // Analisi II special banner
+      const bannerEl = document.getElementById('specialBanner');
+      const analisiCount = state.lessons.filter(l => l.courseId === 'ANALISI2').length;
+      if (ui.view === 'ANALISI2' && analisiCount === 0) {
+        bannerEl.innerHTML = `
+          <div class="banner">
+            <div class="banner-text">
+              <h3>Analisi Matematica 2 — fermo al 06/10</h3>
+              <p>Puoi generare automaticamente tutte le lezioni dall'orario PoliMi (Mar 2h, Gio 3h, Ven 3h) dal 08/10 a oggi in un click, oppure aggiungerle manualmente.</p>
+            </div>
+            <button class="btn btn-primary" id="genAnalisiBtn">Genera da orario</button>
+          </div>
+        `;
+        document.getElementById('genAnalisiBtn').onclick = generateAnalisiBacklog;
+      } else {
+        bannerEl.innerHTML = '';
+      }
+
+      // List
+      const list = getFilteredLessons();
+      const listEl = document.getElementById('lessonList');
+      if (list.length === 0) {
+        listEl.innerHTML = `<div class="empty-state">Nessuna lezione in questa vista.</div>`;
+        return;
+      }
+
+      listEl.innerHTML = list.map(l => {
+        const c = getCourse(l.courseId);
+        const eff = effMinutes(l.duration || 120);
+        return `
+          <div class="lesson-row ${l.stage === 3 ? 'done' : ''}" data-id="${l.id}">
+            <button class="status-btn" data-cycle="${l.id}" title="Avanza stato (${STAGES[l.stage].label})">
+              ${stageIcon(l.stage)}
+            </button>
+            <div class="course-tag">
+              <span class="dot" style="background:${c.color}"></span>
+              <span>${c.name}</span>
+            </div>
+            <div class="lesson-main">
+              <div class="lesson-title-line">
+                <span class="lesson-date">${formatDateIT(l.date)}</span>
+                <span class="pill">${l.type}</span>
+                ${l.scheduled ? `<span class="pill cal">Cal: ${formatScheduled(l.scheduled)}</span>` : ''}
+                ${l.topic ? `<span class="lesson-topic">${escapeHtml(l.topic)}</span>` : ''}
+              </div>
+            </div>
+            <div class="lesson-meta">
+              <span>${formatHours(eff)}</span>
+              <span class="stage-label">${STAGES[l.stage].label}</span>
+            </div>
+            <div class="row-actions">
+              <button class="icon-btn" data-cal="${l.id}" title="Aggiungi a Google Calendar">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      listEl.querySelectorAll('.lesson-row').forEach(row => {
+        row.onclick = (e) => {
+          if (e.target.closest('[data-cycle]') || e.target.closest('[data-cal]')) return;
+          openDrawer(row.dataset.id);
+        };
+      });
+      listEl.querySelectorAll('[data-cycle]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          const lesson = state.lessons.find(x => x.id === btn.dataset.cycle);
+          if (!lesson) return;
+          lesson.stage = (lesson.stage + 1) % 4;
+          saveState();
+        };
+      });
+      listEl.querySelectorAll('[data-cal]').forEach(btn => {
+        btn.onclick = (e) => {
+          e.stopPropagation();
+          openCalModal(btn.dataset.cal);
+        };
+      });
+    }
+
+    function escapeHtml(str) {
+      return String(str).replace(/[&<>"']/g, s => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[s]));
+    }
+
+    function generateAnalisiBacklog() {
+      const start = new Date('2026-10-08T12:00:00');
+      const end = new Date();
+      const course = getCourse('ANALISI2');
+      let added = 0;
+      for (let d = new Date(start); d <= end; d.setDate(d.getDate() + 1)) {
+        const dow = d.getDay();
+        const slot = course.schedule.find(s => s.dow === dow);
+        if (slot) {
+          const iso = d.toISOString().slice(0, 10);
+          const id = `analisi2-${iso}`;
+          if (!state.lessons.some(l => l.id === id)) {
+            state.lessons.push({
+              id,
+              courseId: 'ANALISI2',
+              date: iso,
+              type: slot.type,
+              duration: slot.duration,
+              stage: 0,
+              topic: '',
+              url: '',
+              notes: '',
+              scheduled: ''
+            });
+            added++;
+          }
+        }
+      }
+      saveState();
+      toast(`Aggiunte ${added} lezioni di Analisi II`);
+    }
+
+    // Drawer
+    function openDrawer(id) {
+      const l = state.lessons.find(x => x.id === id);
+      if (!l) return;
+      ui.activeLessonId = id;
+      const c = getCourse(l.courseId);
+      document.getElementById('drawerHeading').innerHTML = `<span class="dot" style="background:${c.color}"></span> ${c.name} · ${formatDateIT(l.date)}`;
+      document.getElementById('drawerBody').innerHTML = `
+        <div class="field">
+          <label>Stato avanzamento</label>
+          <div class="stage-grid">
+            ${STAGES.map(s => `<button type="button" class="stage-chip ${l.stage === s.id ? 'active' : ''}" data-set-stage="${s.id}">${s.label}</button>`).join('')}
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Data originale</label>
+            <input type="date" id="edDate" value="${l.date}" />
+          </div>
+          <div class="field">
+            <label>Durata (min)</label>
+            <input type="number" id="edDuration" value="${l.duration || 120}" min="15" step="15" />
+          </div>
+        </div>
+        <div class="field-row">
+          <div class="field">
+            <label>Tipo</label>
+            <select id="edType">
+              <option value="Lezione" ${l.type === 'Lezione' ? 'selected' : ''}>Lezione</option>
+              <option value="Esercitazione" ${l.type === 'Esercitazione' ? 'selected' : ''}>Esercitazione</option>
+              <option value="Laboratorio" ${l.type === 'Laboratorio' ? 'selected' : ''}>Laboratorio</option>
+            </select>
+          </div>
+          <div class="field">
+            <label>Pianificata il</label>
+            <input type="datetime-local" id="edScheduled" value="${l.scheduled || ''}" />
+          </div>
+        </div>
+        <div class="field">
+          <label>Argomento</label>
+          <input type="text" id="edTopic" value="${escapeHtml(l.topic || '')}" placeholder="Argomento trattato..." />
+        </div>
+        <div class="field">
+          <label>Link registrazione</label>
+          <div style="display:flex;gap:6px">
+            <input type="url" id="edUrl" value="${escapeHtml(l.url || '')}" placeholder="https://..." />
+            ${l.url ? `<a class="btn" href="${escapeHtml(l.url)}" target="_blank" rel="noopener">Apri</a>` : ''}
+          </div>
+        </div>
+        <div class="field">
+          <label>Note e dubbi da rivedere</label>
+          <textarea id="edNotes" rows="5" placeholder="Passaggi poco chiari, esercizi da rifare...">${escapeHtml(l.notes || '')}</textarea>
+        </div>
+      `;
+
+      document.querySelectorAll('[data-set-stage]').forEach(btn => {
+        btn.onclick = () => {
+          document.querySelectorAll('[data-set-stage]').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+        };
+      });
+
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('drawer').classList.add('open');
+    }
+
+    function closeAllOverlays() {
+      document.getElementById('overlay').classList.remove('open');
+      document.getElementById('drawer').classList.remove('open');
+      document.querySelectorAll('.modal').forEach(m => m.classList.remove('open'));
+      closeMobileSidebar();
+    }
+
+    function closeMobileSidebar() {
+      document.getElementById('sidebar').classList.remove('open');
+    }
+
+    document.getElementById('saveDrawerBtn').onclick = () => {
+      const l = state.lessons.find(x => x.id === ui.activeLessonId);
+      if (!l) return;
+      const activeStage = document.querySelector('[data-set-stage].active');
+      l.stage = activeStage ? Number(activeStage.dataset.setStage) : l.stage;
+      l.date = document.getElementById('edDate').value || l.date;
+      l.duration = Number(document.getElementById('edDuration').value) || 120;
+      l.type = document.getElementById('edType').value;
+      l.scheduled = document.getElementById('edScheduled').value;
+      l.topic = document.getElementById('edTopic').value.trim();
+      l.url = document.getElementById('edUrl').value.trim();
+      l.notes = document.getElementById('edNotes').value.trim();
+      saveState();
+      closeAllOverlays();
+      toast('Modifiche salvate');
+    };
+
+    document.getElementById('deleteLessonBtn').onclick = () => {
+      state.lessons = state.lessons.filter(x => x.id !== ui.activeLessonId);
+      saveState();
+      closeAllOverlays();
+      toast('Lezione eliminata');
+    };
+
+    document.getElementById('drawerCalBtn').onclick = () => {
+      const id = ui.activeLessonId;
+      closeAllOverlays();
+      openCalModal(id);
+    };
+
+    // Google Calendar modal
+    function openCalModal(id) {
+      const l = state.lessons.find(x => x.id === id);
+      if (!l) return;
+      ui.calLessonId = id;
+      const c = getCourse(l.courseId);
+      document.getElementById('calLessonSummary').textContent = `Recupero ${c.name} (${l.type} del ${formatDateIT(l.date)})`;
+      const today = new Date();
+      const todayIso = today.toISOString().slice(0, 10);
+      const tom = new Date(today); tom.setDate(tom.getDate() + 1);
+      const tomIso = tom.toISOString().slice(0, 10);
+
+      document.getElementById('calDate').value = l.scheduled ? l.scheduled.split('T')[0] : todayIso;
+      document.getElementById('calTime').value = l.scheduled ? (l.scheduled.split('T')[1] || '15:00') : '15:00';
+
+      document.getElementById('calQuickChips').innerHTML = `
+        <button class="chip" data-qd="${todayIso}" data-qt="14:30">Oggi 14:30</button>
+        <button class="chip" data-qd="${todayIso}" data-qt="17:30">Oggi 17:30</button>
+        <button class="chip" data-qd="${tomIso}" data-qt="09:00">Domani 09:00</button>
+        <button class="chip" data-qd="${tomIso}" data-qt="14:30">Domani 14:30</button>
+      `;
+      document.querySelectorAll('#calQuickChips .chip').forEach(ch => {
+        ch.onclick = () => {
+          document.getElementById('calDate').value = ch.dataset.qd;
+          document.getElementById('calTime').value = ch.dataset.qt;
+          updateCalInfo();
+        };
+      });
+      updateCalInfo();
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('calModal').classList.add('open');
+    }
+
+    function updateCalInfo() {
+      const l = state.lessons.find(x => x.id === ui.calLessonId);
+      if (!l) return;
+      const buf = document.getElementById('calBuffer').checked ? 15 : 0;
+      const total = effMinutes(l.duration || 120) + buf;
+      document.getElementById('calDurationInfo').textContent = `Durata blocco stimata: ${formatHours(total)} (lezione ${formatHours(l.duration)} a ${state.speed}x${buf ? ' + 15m appunti' : ''}).`;
+    }
+    document.getElementById('calBuffer').onchange = updateCalInfo;
+
+    function buildCalDetails() {
+      const l = state.lessons.find(x => x.id === ui.calLessonId);
+      const c = getCourse(l.courseId);
+      const date = document.getElementById('calDate').value;
+      const time = document.getElementById('calTime').value || '15:00';
+      const buf = document.getElementById('calBuffer').checked ? 15 : 0;
+      const totalMins = effMinutes(l.duration || 120) + buf;
+
+      const start = new Date(`${date}T${time}:00`);
+      const end = new Date(start.getTime() + totalMins * 60000);
+      const fmt = d => d.getFullYear()
+        + String(d.getMonth() + 1).padStart(2, '0')
+        + String(d.getDate()).padStart(2, '0') + 'T'
+        + String(d.getHours()).padStart(2, '0')
+        + String(d.getMinutes()).padStart(2, '0') + '00';
+
+      const title = `Recupero ${l.type.toLowerCase()} ${formatDateIT(l.date)} ${c.name}`;
+      const details = [
+        l.topic ? `Argomento: ${l.topic}` : '',
+        l.url ? `Registrazione: ${l.url}` : '',
+        l.notes ? `Note: ${l.notes}` : ''
+      ].filter(Boolean).join('\n');
+
+      l.scheduled = `${date}T${time}`;
+      saveState();
+      return { title, details, startStr: fmt(start), endStr: fmt(end) };
+    }
+
+    document.getElementById('openGcalBtn').onclick = () => {
+      const { title, details, startStr, endStr } = buildCalDetails();
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(details)}`;
+      window.open(url, '_blank', 'noopener');
+      closeAllOverlays();
+      toast('Pianificata e aperta su Google Calendar');
+    };
+
+    document.getElementById('downloadIcsBtn').onclick = () => {
+      const { title, details, startStr, endStr } = buildCalDetails();
+      const ics = [
+        'BEGIN:VCALENDAR',
+        'VERSION:2.0',
+        'PRODID:-//RecuperoLezioni//IT',
+        'BEGIN:VEVENT',
+        `DTSTART:${startStr}`,
+        `DTEND:${endStr}`,
+        `SUMMARY:${title}`,
+        `DESCRIPTION:${details.replace(/\n/g, '\\n')}`,
+        'END:VEVENT',
+        'END:VCALENDAR'
+      ].join('\r\n');
+      const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `${title.replace(/\s+/g, '_')}.ics`;
+      a.click();
+      closeAllOverlays();
+      toast('File .ics scaricato');
+    };
+
+    // Add Lesson Modal
+    document.getElementById('addLessonBtn').onclick = () => {
+      const sel = document.getElementById('addCourse');
+      sel.innerHTML = COURSES.map(c => `<option value="${c.id}" ${ui.view === c.id ? 'selected' : ''}>${c.name}</option>`).join('');
+      document.getElementById('addDate').value = new Date().toISOString().slice(0, 10);
+      document.getElementById('addTopic').value = '';
+      document.getElementById('addUrl').value = '';
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('addModal').classList.add('open');
+    };
+
+    document.getElementById('confirmAddBtn').onclick = () => {
+      const courseId = document.getElementById('addCourse').value;
+      const date = document.getElementById('addDate').value || new Date().toISOString().slice(0, 10);
+      state.lessons.push({
+        id: `${courseId.toLowerCase()}-${Date.now()}`,
+        courseId,
+        date,
+        type: document.getElementById('addType').value,
+        duration: Number(document.getElementById('addDuration').value) || 120,
+        stage: 0,
+        topic: document.getElementById('addTopic').value.trim(),
+        url: document.getElementById('addUrl').value.trim(),
+        notes: '',
+        scheduled: ''
+      });
+      saveState();
+      closeAllOverlays();
+      toast('Lezione aggiunta');
+    };
+
+    // Smart Pick Modal
+    function renderSmartPick() {
+      const mins = Number(document.getElementById('smartMinutes').value) || 90;
+      const open = state.lessons
+        .filter(l => l.stage < 3)
+        .map(l => ({ ...l, eff: effMinutes(l.duration || 120) }))
+        .filter(l => l.eff <= mins)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      const box = document.getElementById('smartResults');
+      if (open.length === 0) {
+        box.innerHTML = `<div class="help-box">Nessuna lezione completa sta in ${mins} min a ${state.speed}x. Prova ad aumentare la velocità o fare mezza lezione.</div>`;
+        return;
+      }
+      box.innerHTML = open.slice(0, 4).map(l => {
+        const c = getCourse(l.courseId);
+        return `
+          <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg)">
+            <div>
+              <div style="font-weight:600;font-size:13px;display:flex;align-items:center;gap:6px">
+                <span class="dot" style="background:${c.color}"></span> ${c.name} · ${formatDateIT(l.date)} (${l.type})
+              </div>
+              <div style="font-size:12px;color:var(--text-secondary)">Stimati ${formatHours(l.eff)} a ${state.speed}x</div>
+            </div>
+            <button class="btn" data-smart-cal="${l.id}">Pianifica</button>
+          </div>
+        `;
+      }).join('');
+      box.querySelectorAll('[data-smart-cal]').forEach(b => {
+        b.onclick = () => { closeAllOverlays(); openCalModal(b.dataset.smartCal); };
+      });
+    }
+
+    document.getElementById('smartPickBtn').onclick = () => {
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('smartModal').classList.add('open');
+      renderSmartPick();
+    };
+    document.getElementById('smartMinutes').oninput = renderSmartPick;
+    document.querySelectorAll('#smartModal .chip').forEach(ch => {
+      ch.onclick = () => {
+        document.getElementById('smartMinutes').value = ch.dataset.mins;
+        renderSmartPick();
+      };
+    });
+
+    // Sync Modal
+    document.getElementById('openSyncBtn').onclick = () => {
+      const cfg = getSyncConfig();
+      document.getElementById('sbUrl').value = cfg.url;
+      document.getElementById('sbKey').value = cfg.key;
+      document.getElementById('sbSyncKey').value = cfg.syncKey;
+      document.getElementById('overlay').classList.add('open');
+      document.getElementById('syncModal').classList.add('open');
+    };
+
+    document.getElementById('saveSyncBtn').onclick = async () => {
+      const cfg = {
+        url: document.getElementById('sbUrl').value.trim().replace(/\/$/, ''),
+        key: document.getElementById('sbKey').value.trim(),
+        syncKey: document.getElementById('sbSyncKey').value.trim()
+      };
+      localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg));
+      await pullFromSupabase(false);
+    };
+    document.getElementById('forcePullBtn').onclick = () => pullFromSupabase(false);
+    document.getElementById('forcePushBtn').onclick = () => pushToSupabase(false);
+
+    document.getElementById('exportJsonBtn').onclick = () => {
+      const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = `backup-recupero-lezioni-${new Date().toISOString().slice(0, 10)}.json`;
+      a.click();
+    };
+    document.getElementById('importJsonInput').onchange = (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        try {
+          const parsed = JSON.parse(reader.result);
+          if (!Array.isArray(parsed.lessons)) throw new Error('Formato non valido');
+          state = parsed;
+          saveState();
+          closeAllOverlays();
+          toast('Backup importato');
+        } catch (err) {
+          toast('File JSON non valido');
+        }
+      };
+      reader.readAsText(file);
+    };
+
+    // Global controls
+    document.getElementById('themeBtn').onclick = () => {
+      state.theme = state.theme === 'dark' ? 'light' : 'dark';
+      applyTheme();
+      saveState();
+    };
+    document.getElementById('speedSelect').onchange = (e) => {
+      state.speed = Number(e.target.value);
+      saveState();
+    };
+    document.getElementById('dailyHoursInput').onchange = (e) => {
+      state.dailyHours = Math.max(0.5, Number(e.target.value) || 2);
+      saveState();
+    };
+    document.querySelectorAll('#stageFilter .seg-btn').forEach(b => {
+      b.onclick = () => {
+        document.querySelectorAll('#stageFilter .seg-btn').forEach(x => x.classList.remove('active'));
+        b.classList.add('active');
+        ui.filter = b.dataset.filter;
+        render();
+      };
+    });
+    document.getElementById('searchInput').oninput = (e) => {
+      ui.search = e.target.value.trim();
+      render();
+    };
+    document.getElementById('mobileMenuBtn').onclick = () => {
+      document.getElementById('sidebar').classList.add('open');
+      document.getElementById('overlay').classList.add('open');
+    };
+    document.getElementById('overlay').onclick = closeAllOverlays;
+    document.getElementById('closeDrawerBtn').onclick = closeAllOverlays;
+    document.querySelectorAll('[data-close-modal]').forEach(b => b.onclick = closeAllOverlays);
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') closeAllOverlays();
+      if (e.key.toLowerCase() === 'n' && !['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) {
+        e.preventDefault();
+        document.getElementById('addLessonBtn').click();
+      }
+    });
+
+    window.addEventListener('focus', () => pullFromSupabase(true));
+
+    // Init
+    applyTheme();
+    render();
+    pullFromSupabase(true);
+  </script>
+</body>
+</html>
