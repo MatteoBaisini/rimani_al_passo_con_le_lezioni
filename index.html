@@ -84,9 +84,15 @@
             <div class="text-[10.5px] text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · 2026</div>
           </div>
         </div>
-        <button id="themeBtn" onclick="toggleTheme()" title="Cambia tema" aria-label="Cambia tema"
-          class="w-8 h-8 rounded-lg flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] hover:text-[#111113] dark:hover:text-white transition">
-        </button>
+        <div class="flex items-center gap-1 shrink-0">
+          <button id="themeBtn" onclick="toggleTheme()" title="Cambia tema" aria-label="Cambia tema"
+            class="w-8 h-8 rounded-lg flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] hover:text-[#111113] dark:hover:text-white transition">
+          </button>
+          <button onclick="closeAllOverlays()" title="Chiudi menu" aria-label="Chiudi menu"
+            class="lg:hidden w-8 h-8 rounded-lg flex items-center justify-center text-[#52525B] dark:text-[#A1A1AA] hover:bg-black/[0.05] dark:hover:bg-white/[0.07] hover:text-[#111113] dark:hover:text-white transition">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+          </button>
+        </div>
       </div>
 
       <!-- Navigation -->
@@ -198,7 +204,7 @@
 
         <!-- Topbar Actions -->
         <div class="flex items-center gap-2 shrink-0">
-          <button onclick="openTimetableModal()"
+          <button onclick="openTimetableModal()" title="Orario PoliMi" aria-label="Orario PoliMi"
             class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition shadow-sm">
             <svg class="w-3.5 h-3.5 text-[#52525B] dark:text-[#A1A1AA]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h12A2.25 2.25 0 0120.25 6v12A2.25 2.25 0 0118 20.25H6A2.25 2.25 0 013.75 18V6zm0 4.5h16.5M9.75 10.5v9.75" />
@@ -206,7 +212,7 @@
             <span class="hidden sm:inline">Orario</span>
           </button>
 
-          <button onclick="openSmartModal()"
+          <button onclick="openSmartModal()" title="Ho X minuti liberi" aria-label="Ho X minuti liberi"
             class="inline-flex items-center gap-1.5 px-2.5 sm:px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition shadow-sm">
             <svg class="w-3.5 h-3.5 text-[#52525B] dark:text-[#A1A1AA]" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -281,7 +287,7 @@
             </svg>
             <input id="searchInput" type="search" placeholder="Cerca lezioni..."
               class="peer w-full pl-9 pr-9 py-1.5 rounded-xl border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark text-[13px] placeholder:text-[#8E8E93] focus:outline-none focus:border-black/25 dark:focus:border-white/25 transition shadow-sm" />
-            <kbd class="hidden sm:flex peer-focus:hidden absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 items-center justify-center rounded border border-black/[0.1] dark:border-white/[0.12] font-mono text-[10.5px] text-[#8E8E93]">/</kbd>
+            <kbd class="hidden sm:flex peer-focus:hidden absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none w-5 h-5 items-center justify-center rounded bg-porcelain dark:bg-white/[0.08] border border-black/[0.12] dark:border-white/[0.22] font-mono text-[10.5px] text-[#71717A] dark:text-[#D4D4D8]">/</kbd>
           </div>
         </section>
 
@@ -296,7 +302,7 @@
   <!-- ===================================================================== -->
   <!-- SLIDE-OVER DETAIL DRAWER                                              -->
   <!-- ===================================================================== -->
-  <aside id="drawer"
+  <aside id="drawer" inert aria-hidden="true"
     class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white dark:bg-cardDark border-l border-black/[0.08] dark:border-white/[0.08] shadow-float flex flex-col transform translate-x-full transition-transform duration-200 ease-out">
     <div class="h-16 px-5 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
       <div id="drawerHeading" class="flex items-center gap-2 text-[14px] font-semibold truncate">Dettaglio lezione</div>
@@ -360,7 +366,7 @@
     <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
         <h2 class="text-[15px] font-semibold tracking-tight">Nuova lezione da recuperare</h2>
-        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+        <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -433,7 +439,7 @@
     <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
         <h2 class="text-[15px] font-semibold tracking-tight">Pianifica su Google Calendar</h2>
-        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+        <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -459,9 +465,14 @@
         <div id="calDurationInfo" class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] tabular-nums"></div>
       </div>
       <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2">
-        <button onclick="downloadICS()" class="px-3.5 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] text-[12.5px] font-medium transition">
-          Scarica .ics
-        </button>
+        <div class="flex items-center gap-2">
+          <button onclick="downloadICS()" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
+            Scarica .ics
+          </button>
+          <button id="calClearBtn" onclick="clearScheduled()" class="hidden px-2.5 py-1.5 rounded-lg text-[12px] font-medium text-red-600 dark:text-red-400 hover:bg-red-500/10 transition">
+            Rimuovi
+          </button>
+        </div>
         <button onclick="openGoogleCalendar()" class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium hover:opacity-90 transition">
           <span>Apri Google Calendar</span>
           <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24">
@@ -482,7 +493,7 @@
           <h2 class="text-[15px] font-semibold tracking-tight">Ho X minuti liberi</h2>
           <p class="text-[11.5px] text-[#71717A] dark:text-[#8E8E93]">Calcolato a <span id="smartSpeedText" class="font-semibold">1.25x</span> sulle durate effettive</p>
         </div>
-        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+        <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -509,7 +520,7 @@
     <div class="pointer-events-auto w-full max-w-md max-h-[88vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
         <h2 class="text-[15px] font-semibold tracking-tight">Cloud Sync &amp; Backup</h2>
-        <button onclick="closeAllOverlays()" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
+        <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
@@ -730,6 +741,7 @@
       } catch (e) {}
       return {
         lessons: DEFAULT_LESSONS.map(x => ({ ...x })),
+        deletedLessons: {},
         speed: 1.25,
         dailyHours: 2.0,
         theme: 'light',
@@ -780,6 +792,83 @@
       label.textContent = text;
     }
 
+    function mergeStates(localState, remoteState) {
+      const loc = JSON.parse(JSON.stringify(localState));
+      const rem = JSON.parse(JSON.stringify(remoteState));
+      runMigrations(loc);
+      runMigrations(rem);
+
+      const locGlobalTs = Date.parse(loc.updatedAt || 0) || 0;
+      const remGlobalTs = Date.parse(rem.updatedAt || 0) || 0;
+      const cutoff = Date.now() - 90 * 86400000;
+
+      const deletedLessons = {};
+      for (const src of [loc.deletedLessons || {}, rem.deletedLessons || {}]) {
+        for (const [id, ts] of Object.entries(src)) {
+          const ms = Date.parse(ts || 0) || 0;
+          if (ms < cutoff) continue;
+          if (!deletedLessons[id] || ms > (Date.parse(deletedLessons[id]) || 0)) {
+            deletedLessons[id] = ts;
+          }
+        }
+      }
+
+      const locMap = new Map((loc.lessons || []).map(l => [l.id, l]));
+      const remMap = new Map((rem.lessons || []).map(l => [l.id, l]));
+      const allIds = new Set([...locMap.keys(), ...remMap.keys()]);
+      const mergedLessons = [];
+
+      for (const id of allIds) {
+        const lItem = locMap.get(id);
+        const rItem = remMap.get(id);
+        const delTs = deletedLessons[id] ? (Date.parse(deletedLessons[id]) || 0) : 0;
+
+        if (lItem && rItem) {
+          const lTs = Date.parse(lItem.updatedAt || 0) || locGlobalTs;
+          const rTs = Date.parse(rItem.updatedAt || 0) || remGlobalTs;
+          const winner = rTs > lTs ? rItem : lItem;
+          const winTs = Math.max(lTs, rTs);
+          if (delTs > winTs) continue;
+          mergedLessons.push(winner);
+        } else if (lItem) {
+          const lTs = Date.parse(lItem.updatedAt || 0) || locGlobalTs;
+          if (delTs > lTs) continue;
+          mergedLessons.push(lItem);
+        } else if (rItem) {
+          const rTs = Date.parse(rItem.updatedAt || 0) || remGlobalTs;
+          if (delTs > rTs) continue;
+          mergedLessons.push(rItem);
+        }
+      }
+
+      const settingsSrc = remGlobalTs > locGlobalTs ? rem : loc;
+      const merged = {
+        lessons: mergedLessons,
+        deletedLessons,
+        speed: settingsSrc.speed ?? 1.25,
+        dailyHours: settingsSrc.dailyHours ?? 2.0,
+        theme: settingsSrc.theme ?? 'light',
+        effectiveDurationMigrated: true,
+        leaDiaryMigrated: true,
+        updatedAt: new Date(Math.max(locGlobalTs, remGlobalTs)).toISOString()
+      };
+
+      const sig = s => JSON.stringify({
+        lessons: [...(s.lessons || [])].sort((a, b) => a.id.localeCompare(b.id)),
+        deletedLessons: s.deletedLessons || {},
+        speed: s.speed,
+        dailyHours: s.dailyHours,
+        theme: s.theme
+      });
+
+      const changedVsLocal = sig(merged) !== sig(localState);
+      const changedVsRemote = sig(merged) !== sig(remoteState);
+      if (changedVsLocal && changedVsRemote) {
+        merged.updatedAt = new Date().toISOString();
+      }
+      return { merged, changedVsLocal, changedVsRemote };
+    }
+
     async function pushToSupabase(silent = false) {
       const cfg = getSyncConfig();
       if (!cfg.url || !cfg.key || !cfg.syncKey) {
@@ -787,21 +876,32 @@
         return;
       }
       setSyncUI('busy', 'Invio...');
+      const headers = {
+        'apikey': cfg.key,
+        'Authorization': `Bearer ${cfg.key}`,
+        'Content-Type': 'application/json'
+      };
       try {
-        const res = await fetch(`${cfg.url}/rest/v1/study_state?on_conflict=sync_key`, {
+        let res = await fetch(`${cfg.url}/rest/v1/rpc/upsert_study_state`, {
           method: 'POST',
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`,
-            'Content-Type': 'application/json',
-            'Prefer': 'resolution=merge-duplicates'
-          },
+          headers,
           body: JSON.stringify({
-            sync_key: cfg.syncKey,
-            payload: state,
-            updated_at: state.updatedAt
+            p_sync_key: cfg.syncKey,
+            p_payload: state,
+            p_updated_at: state.updatedAt
           })
         });
+        if (res.status === 404) {
+          res = await fetch(`${cfg.url}/rest/v1/study_state?on_conflict=sync_key`, {
+            method: 'POST',
+            headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
+            body: JSON.stringify({
+              sync_key: cfg.syncKey,
+              payload: state,
+              updated_at: state.updatedAt
+            })
+          });
+        }
         if (!res.ok) throw new Error(await res.text());
         setSyncUI('ok', 'Sincronizzato');
         if (!silent) toast('Dati salvati sul cloud');
@@ -819,46 +919,43 @@
         return;
       }
       setSyncUI('busy', 'Verifica...');
+      const headers = {
+        'apikey': cfg.key,
+        'Authorization': `Bearer ${cfg.key}`,
+        'Content-Type': 'application/json'
+      };
       try {
-        const res = await fetch(`${cfg.url}/rest/v1/study_state?sync_key=eq.${encodeURIComponent(cfg.syncKey)}&select=payload,updated_at`, {
-          headers: {
-            'apikey': cfg.key,
-            'Authorization': `Bearer ${cfg.key}`
-          }
+        let res = await fetch(`${cfg.url}/rest/v1/rpc/get_study_state`, {
+          method: 'POST',
+          headers,
+          body: JSON.stringify({ p_sync_key: cfg.syncKey })
         });
+        if (res.status === 404) {
+          res = await fetch(`${cfg.url}/rest/v1/study_state?sync_key=eq.${encodeURIComponent(cfg.syncKey)}&select=payload,updated_at`, {
+            headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
+          });
+        }
         if (!res.ok) throw new Error(await res.text());
         const rows = await res.json();
-        if (rows.length === 0) {
+        if (!Array.isArray(rows) || rows.length === 0) {
           await pushToSupabase(true);
           return;
         }
         const remote = rows[0].payload;
         if (remote && Array.isArray(remote.lessons)) {
-          const remoteIsNewer = !state.updatedAt || new Date(remote.updatedAt) > new Date(state.updatedAt);
-          if (remoteIsNewer) {
-            state = remote;
-            const migrated = runMigrations(state);
-            if (migrated) {
-              state.updatedAt = new Date().toISOString();
-              localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-              applyTheme();
-              render();
-              await pushToSupabase(true);
-              if (!silent) toast('Aggiornato dal cloud');
-              return;
-            }
+          const { merged, changedVsLocal, changedVsRemote } = mergeStates(state, remote);
+          if (changedVsLocal) {
+            state = merged;
             localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
             applyTheme();
             render();
-            if (!silent) toast('Aggiornato dal cloud');
-          } else {
-            // Local might have just run migrations
-            if ((!remote.effectiveDurationMigrated && state.effectiveDurationMigrated) || (!remote.leaDiaryMigrated && state.leaDiaryMigrated)) {
-              await pushToSupabase(true);
-            } else if (!silent) {
-              toast('Già aggiornato');
-            }
           }
+          if (changedVsRemote) {
+            await pushToSupabase(true);
+            if (!silent) toast(changedVsLocal ? 'Sincronizzato e unito' : 'Aggiornato sul cloud');
+            return;
+          }
+          if (!silent) toast(changedVsLocal ? 'Aggiornato dal cloud' : 'Già aggiornato');
         }
         setSyncUI('ok', 'Sincronizzato');
       } catch (err) {
@@ -910,6 +1007,19 @@
 
     function toIsoDate(d) {
       return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function parseIsoLocal(iso) {
+      const [y, m, d] = iso.split('-').map(Number);
+      return new Date(y, m - 1, d);
+    }
+
+    function normalizeUrl(raw) {
+      const s = String(raw || '').trim();
+      if (!s) return '';
+      if (/^https?:\/\//i.test(s)) return s;
+      if (/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(s)) return '';
+      return `https://${s}`;
     }
 
     function escapeHtml(str) {
@@ -1066,9 +1176,12 @@
       const daysNeeded = adjMins > 0 ? Math.ceil((adjMins / 60) / dailyHrs) : 0;
       const targetDate = new Date();
       targetDate.setDate(targetDate.getDate() + daysNeeded);
-      const targetStr = daysNeeded === 0
-        ? 'In pari'
-        : targetDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
+      const isAnalisiPending = ui.view === 'ANALISI2' && scopeLessons.length === 0;
+      const targetStr = isAnalisiPending
+        ? '—'
+        : daysNeeded === 0
+          ? 'In pari'
+          : targetDate.toLocaleDateString('it-IT', { day: '2-digit', month: 'short' });
 
       // Header title & subtitle
       const dot = document.getElementById('viewHeaderDot');
@@ -1078,20 +1191,22 @@
       if (ui.view === 'all') {
         dot.classList.add('hidden');
         title.textContent = 'Tutte le lezioni';
-        sub.textContent = daysNeeded
-          ? `${formatHours(adjMins)} da recuperare a ${state.speed}x · in pari entro ${targetStr}`
+        sub.innerHTML = daysNeeded
+          ? `<span class="sm:hidden">${formatHours(adjMins)} · entro ${targetStr}</span><span class="hidden sm:inline">${formatHours(adjMins)} da recuperare a ${state.speed}x · in pari entro ${targetStr}</span>`
           : 'Nessun arretrato';
       } else if (ui.view === 'scheduled') {
         dot.classList.add('hidden');
         title.textContent = 'Pianificate su Calendar';
         const schedCnt = scopeOpen.filter(l => l.scheduled).length;
-        sub.textContent = `${schedCnt} sessioni in calendario`;
+        sub.textContent = `${schedCnt} ${schedCnt === 1 ? 'sessione' : 'sessioni'} in calendario`;
       } else {
         const c = getCourse(ui.view);
         dot.classList.remove('hidden');
         dot.style.background = c.color;
         title.textContent = c.fullName;
-        sub.textContent = `${scopeOpen.length} da recuperare · ${formatHours(adjMins)} a ${state.speed}x`;
+        sub.textContent = isAnalisiPending
+          ? 'Nessuna lezione inserita dal 06/10'
+          : `${scopeOpen.length} da recuperare · ${formatHours(adjMins)} a ${state.speed}x`;
       }
 
       // KPI Cards
@@ -1102,18 +1217,20 @@
           <div class="mt-1 text-[24px] leading-8 font-semibold tabular-nums tracking-tight">${value}</div>
           <div class="text-[11.5px] text-[#8E8E93] tabular-nums">${sub}</div>
         </div>`;
+      const daysLabel = daysNeeded === 1 ? 'giorno' : 'giorni';
+      const doneLabel = scopeDone.length === 1 ? 'completata' : 'completate';
       document.getElementById('kpiGrid').innerHTML = [
-        kpi('Da recuperare', scopeOpen.length, `${scopeDone.length} completate`),
+        kpi('Da recuperare', scopeOpen.length, `${scopeDone.length} ${doneLabel}`),
         kpi(`Tempo a ${state.speed}x`, formatHours(adjMins), `${formatHours(baseMins)} a velocità normale`),
-        kpi('In pari entro', targetStr, daysNeeded ? `${daysNeeded} giorni a ${dailyHrs.toFixed(1)}h al giorno` : 'Nessun arretrato'),
+        kpi('In pari entro', targetStr, isAnalisiPending ? 'Fermo al 06/10' : daysNeeded ? `${daysNeeded} ${daysLabel} a ${dailyHrs.toFixed(1)}h al giorno` : 'Nessun arretrato'),
         kpi('In calendario', scheduledOpen, `su ${scopeOpen.length} da recuperare`)
       ].join('');
 
       // Overall Completion Bar
       const total = scopeLessons.length;
       const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / 3), 0);
-      const pct = total === 0 ? 100 : Math.round((weightedDone / total) * 100);
-      document.getElementById('overallPctText').textContent = `${pct}%`;
+      const pct = total === 0 ? (isAnalisiPending ? null : 100) : Math.round((weightedDone / total) * 100);
+      document.getElementById('overallPctText').textContent = pct === null ? '—' : `${pct}%`;
 
       // One segment per started stage (done first), "Da vedere" is the empty track
       const stageCounts = STAGES.map(s => scopeLessons.filter(l => l.stage === s.id).length);
@@ -1178,7 +1295,8 @@
             <span class="text-[11.5px] tabular-nums text-[#8E8E93] truncate">${escapeHtml(next.reason)}</span>
           </div>
           <div class="mt-3 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div class="flex items-center gap-4 min-w-0">
+            <div onclick="openDrawer('${l.id}')" role="button" tabindex="0" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();openDrawer('${l.id}');}"
+              class="flex items-center gap-4 min-w-0 cursor-pointer rounded-xl -m-1.5 p-1.5 hover:bg-porcelain/70 dark:hover:bg-cardDarkHover transition">
               <div class="w-12 h-12 rounded-xl flex flex-col items-center justify-center shrink-0" style="background:${c.tint}; color:${c.color}">
                 <span class="text-[17px] leading-none font-semibold tabular-nums">${l.date.slice(8)}</span>
                 <span class="mt-0.5 text-[10px] leading-none font-semibold uppercase">${formatDateReadable(l.date).slice(7)}</span>
@@ -1191,8 +1309,8 @@
               </div>
             </div>
             <div class="flex items-center gap-2 shrink-0">
-              ${l.url ? `
-                <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener"
+              ${normalizeUrl(l.url) ? `
+                <a href="${escapeHtml(normalizeUrl(l.url))}" target="_blank" rel="noopener"
                   class="${btnBase} flex-1 sm:flex-none border border-black/[0.1] dark:border-white/[0.1] hover:bg-black/[0.03] dark:hover:bg-cardDarkHover">
                   <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/></svg>
                   Guarda
@@ -1308,7 +1426,7 @@
 
     function weekLabel(startIso) {
       const thisWeek = weekStartIso(toIsoDate(new Date()));
-      const diffWeeks = Math.round((new Date(startIso) - new Date(thisWeek)) / (7 * 86400000));
+      const diffWeeks = Math.round((parseIsoLocal(startIso) - parseIsoLocal(thisWeek)) / (7 * 86400000));
       if (diffWeeks === 0) return 'Questa settimana';
       if (diffWeeks === -1) return 'Settimana scorsa';
       if (diffWeeks === 1) return 'Prossima settimana';
@@ -1320,17 +1438,20 @@
       const items = getFilteredLessons();
 
       if (items.length === 0) {
-        const caughtUp = !ui.search && ui.filter === 'open';
+        const isAnalisiPending = ui.view === 'ANALISI2' && state.lessons.filter(l => l.courseId === 'ANALISI2').length === 0 && !ui.search;
+        const caughtUp = !ui.search && ui.filter === 'open' && !isAnalisiPending;
         container.innerHTML = `
           <div class="bg-white dark:bg-cardDark border border-dashed border-black/[0.12] dark:border-white/[0.12] rounded-2xl px-6 py-12 text-center">
             <div class="mx-auto w-10 h-10 rounded-full flex items-center justify-center ${caughtUp ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-black/[0.04] dark:bg-white/[0.06] text-[#8E8E93]'}">
               ${caughtUp
                 ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M4.5 12.75l6 6 9-13.5"/></svg>'
-                : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>'}
+                : isAnalisiPending
+                  ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>'
+                  : '<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"/></svg>'}
             </div>
-            <div class="mt-3 text-[14px] font-semibold">${caughtUp ? 'Sei in pari' : 'Nessuna lezione trovata'}</div>
+            <div class="mt-3 text-[14px] font-semibold">${isAnalisiPending ? 'Nessuna lezione inserita' : caughtUp ? 'Sei in pari' : 'Nessuna lezione trovata'}</div>
             <div class="mt-1 text-[12.5px] text-[#71717A] dark:text-[#8E8E93]">
-              ${caughtUp ? 'Niente da recuperare in questa vista.' : ui.search ? `Nessun risultato per “${escapeHtml(ui.search)}”.` : 'Prova a cambiare filtro.'}
+              ${isAnalisiPending ? 'Usa il pulsante sopra per generare l\'arretrato dal 08/10 oppure aggiungi una lezione.' : caughtUp ? 'Niente da recuperare in questa vista.' : ui.search ? `Nessun risultato per “${escapeHtml(ui.search)}”.` : 'Prova a cambiare filtro.'}
             </div>
           </div>
         `;
@@ -1416,15 +1537,15 @@
               <span class="text-[12.5px] font-medium tabular-nums text-[#52525B] dark:text-[#A1A1AA] w-[52px] text-right ${isDone ? 'opacity-50' : ''}" title="${formatHours(baseMin)} a velocità normale">${formatHours(effMin)}</span>
 
               <div class="flex items-center gap-0.5 lg:opacity-40 lg:group-hover:opacity-100 transition">
-                ${l.url ? `
-                  <a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Apri registrazione"
+                ${normalizeUrl(l.url) ? `
+                  <a href="${escapeHtml(normalizeUrl(l.url))}" target="_blank" rel="noopener" onclick="event.stopPropagation()" title="Apri registrazione" aria-label="Apri registrazione"
                     class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#111113] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" d="M5.25 5.653c0-.856.917-1.398 1.667-.986l11.54 6.348a1.125 1.125 0 010 1.971l-11.54 6.347a1.125 1.125 0 01-1.667-.985V5.653z"/>
                     </svg>
                   </a>` : ''}
 
-                <button onclick="openCalModal(event, '${l.id}')" title="Pianifica su Google Calendar"
+                <button onclick="openCalModal(event, '${l.id}')" title="Pianifica su Google Calendar" aria-label="Pianifica su Google Calendar"
                   class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:text-[#111113] dark:hover:text-white hover:bg-black/[0.05] dark:hover:bg-white/[0.07] transition">
                   <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.75" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 012.25-2.25h13.5A2.25 2.25 0 0121 7.5v11.25m-18 0A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75m-18 0v-7.5A2.25 2.25 0 015.25 9h13.5A2.25 2.25 0 0121 11.25v7.5"/>
@@ -1472,6 +1593,7 @@
       const l = state.lessons.find(x => x.id === id);
       if (!l) return;
       l.stage = (l.stage + 1) % 4;
+      l.updatedAt = new Date().toISOString();
       saveState();
       toast(`Stato: ${STAGES[l.stage].label}`);
     }
@@ -1487,7 +1609,10 @@
 
     function closeAllOverlays() {
       document.getElementById('overlay').classList.add('hidden');
-      document.getElementById('drawer').classList.add('translate-x-full');
+      const drawer = document.getElementById('drawer');
+      drawer.classList.add('translate-x-full');
+      drawer.setAttribute('inert', '');
+      drawer.setAttribute('aria-hidden', 'true');
       ['timetableModal', 'addModal', 'calModal', 'smartModal', 'syncModal'].forEach(id => {
         const el = document.getElementById(id);
         el.classList.add('hidden');
@@ -1589,6 +1714,8 @@
           const iso = toIsoDate(d);
           const id = `analisi2-${iso}`;
           if (!state.lessons.some(l => l.id === id)) {
+            const nowIso = new Date().toISOString();
+            if (state.deletedLessons && state.deletedLessons[id]) delete state.deletedLessons[id];
             state.lessons.push({
               id,
               courseId: 'ANALISI2',
@@ -1599,7 +1726,8 @@
               topic: '',
               url: '',
               notes: '',
-              scheduled: ''
+              scheduled: '',
+              updatedAt: nowIso
             });
             added++;
           }
@@ -1631,7 +1759,7 @@
           <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1.5">Stato avanzamento</label>
           <div class="grid grid-cols-4 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06]">
             ${STAGES.map(s => `
-              <button type="button" data-set-stage="${s.id}" onclick="selectDrawerStage(${s.id})"
+              <button type="button" data-set-stage="${s.id}" data-active="${l.stage === s.id ? '1' : '0'}" onclick="selectDrawerStage(${s.id})"
                 class="py-1.5 rounded-lg text-[11.5px] font-medium transition ${
                   l.stage === s.id
                     ? 'bg-white dark:bg-cardDark text-[#111113] dark:text-white shadow-sm font-semibold'
@@ -1693,7 +1821,7 @@
           <div class="flex gap-2">
             <input id="edUrl" type="url" value="${escapeHtml(l.url || '')}" placeholder="https://webeep.polimi.it/..."
               class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
-            ${l.url ? `<a href="${escapeHtml(l.url)}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] shrink-0">Apri</a>` : ''}
+            ${normalizeUrl(l.url) ? `<a href="${escapeHtml(normalizeUrl(l.url))}" target="_blank" rel="noopener" class="px-3 py-2 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.04] dark:hover:bg-white/[0.06] shrink-0">Apri</a>` : ''}
           </div>
         </div>
 
@@ -1706,7 +1834,10 @@
 
       renderDeleteButton();
       document.getElementById('overlay').classList.remove('hidden');
-      document.getElementById('drawer').classList.remove('translate-x-full');
+      const drawer = document.getElementById('drawer');
+      drawer.removeAttribute('inert');
+      drawer.setAttribute('aria-hidden', 'false');
+      drawer.classList.remove('translate-x-full');
     }
 
     function selectDrawerStage(stageId) {
@@ -1734,6 +1865,8 @@
     }
 
     function confirmDeleteLesson() {
+      if (!state.deletedLessons) state.deletedLessons = {};
+      state.deletedLessons[ui.activeLessonId] = new Date().toISOString();
       state.lessons = state.lessons.filter(x => x.id !== ui.activeLessonId);
       saveState();
       closeAllOverlays();
@@ -1750,8 +1883,9 @@
       l.type = document.getElementById('edType').value;
       l.scheduled = document.getElementById('edScheduled').value;
       l.topic = document.getElementById('edTopic').value.trim();
-      l.url = document.getElementById('edUrl').value.trim();
+      l.url = normalizeUrl(document.getElementById('edUrl').value);
       l.notes = document.getElementById('edNotes').value.trim();
+      l.updatedAt = new Date().toISOString();
       saveState();
       closeAllOverlays();
       toast('Modifiche salvate');
@@ -1794,9 +1928,10 @@
         duration: Math.max(15, Number(document.getElementById('addDuration').value) || 90),
         stage: 0,
         topic: document.getElementById('addTopic').value.trim(),
-        url: document.getElementById('addUrl').value.trim(),
+        url: normalizeUrl(document.getElementById('addUrl').value),
         notes: '',
-        scheduled: ''
+        scheduled: '',
+        updatedAt: new Date().toISOString()
       });
       saveState();
       closeAllOverlays();
@@ -1823,6 +1958,7 @@
 
       document.getElementById('calDate').value = l.scheduled ? l.scheduled.split('T')[0] : todayIso;
       document.getElementById('calTime').value = l.scheduled ? (l.scheduled.split('T')[1] || '15:00') : '15:00';
+      document.getElementById('calClearBtn').classList.toggle('hidden', !l.scheduled);
 
       const chips = [
         { label: 'Oggi 14:30', d: todayIso, t: '14:30' },
@@ -1841,6 +1977,16 @@
       openModal('calModal');
     }
 
+    function clearScheduled() {
+      const l = state.lessons.find(x => x.id === ui.calLessonId);
+      if (!l) return;
+      l.scheduled = '';
+      l.updatedAt = new Date().toISOString();
+      saveState();
+      closeAllOverlays();
+      toast('Pianificazione rimossa');
+    }
+
     function applyCalChip(d, t) {
       document.getElementById('calDate').value = d;
       document.getElementById('calTime').value = t;
@@ -1854,6 +2000,14 @@
       const buf = document.getElementById('calBuffer').checked ? 15 : 0;
       const total = effMinutes(base) + buf;
       document.getElementById('calDurationInfo').textContent = `Blocco stimato: ${formatHours(total)} (effettivi ${formatHours(base)} a ${state.speed}x${buf ? ' + 15m appunti' : ''})`;
+    }
+
+    function escapeIcsText(str) {
+      return String(str || '')
+        .replace(/\\/g, '\\\\')
+        .replace(/;/g, '\\;')
+        .replace(/,/g, '\\,')
+        .replace(/\r?\n/g, '\\n');
     }
 
     function buildCalPayload() {
@@ -1871,38 +2025,45 @@
         + String(d.getDate()).padStart(2, '0') + 'T'
         + String(d.getHours()).padStart(2, '0')
         + String(d.getMinutes()).padStart(2, '0') + '00';
+      const nowUtc = new Date().toISOString().replace(/[-:]/g, '').replace(/\.\d{3}Z$/, 'Z');
 
       const title = `Recupero ${l.type.toLowerCase()} ${formatDateShort(l.date)} ${c.name}`;
+      const safeUrl = normalizeUrl(l.url);
       const details = [
         l.topic ? `Argomento: ${l.topic}` : '',
-        l.url ? `Registrazione: ${l.url}` : '',
+        safeUrl ? `Registrazione: ${safeUrl}` : '',
         l.notes ? `Note: ${l.notes}` : ''
       ].filter(Boolean).join('\n');
 
       l.scheduled = `${date}T${time}`;
+      l.updatedAt = new Date().toISOString();
       saveState();
-      return { title, details, startStr: fmt(start), endStr: fmt(end) };
+      return { id: l.id, title, details, startStr: fmt(start), endStr: fmt(end), dtstamp: nowUtc };
     }
 
     function openGoogleCalendar() {
       const { title, details, startStr, endStr } = buildCalPayload();
-      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&details=${encodeURIComponent(details)}`;
+      const url = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(title)}&dates=${startStr}/${endStr}&ctz=Europe/Rome&details=${encodeURIComponent(details)}`;
       window.open(url, '_blank', 'noopener');
       closeAllOverlays();
       toast('Pianificata e aperta su Google Calendar');
     }
 
     function downloadICS() {
-      const { title, details, startStr, endStr } = buildCalPayload();
+      const { id, title, details, startStr, endStr, dtstamp } = buildCalPayload();
       const ics = [
         'BEGIN:VCALENDAR',
         'VERSION:2.0',
         'PRODID:-//RecuperoLezioni//PoliMi//IT',
+        'CALSCALE:GREGORIAN',
+        'X-WR-TIMEZONE:Europe/Rome',
         'BEGIN:VEVENT',
-        `DTSTART:${startStr}`,
-        `DTEND:${endStr}`,
-        `SUMMARY:${title}`,
-        `DESCRIPTION:${details.replace(/\n/g, '\\n')}`,
+        `UID:${id}@recupero-lezioni.polimi`,
+        `DTSTAMP:${dtstamp}`,
+        `DTSTART;TZID=Europe/Rome:${startStr}`,
+        `DTEND;TZID=Europe/Rome:${endStr}`,
+        `SUMMARY:${escapeIcsText(title)}`,
+        `DESCRIPTION:${escapeIcsText(details)}`,
         'END:VEVENT',
         'END:VCALENDAR'
       ].join('\r\n');
