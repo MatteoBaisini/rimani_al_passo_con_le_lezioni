@@ -1,42 +1,34 @@
-# Recupero Lezioni — Guida al Deploy Gratis (€0)
+# Recupero Lezioni
 
-Questa cartella contiene tutto il necessario per mettere online la Web App gratis su **GitHub Pages** e sincronizzarla in tempo reale tra **PC, iPad e iPhone** tramite **Supabase Free Tier** (nessuna carta di credito richiesta).
+Webapp personale per tenere traccia delle lezioni universitarie (PoliMi) da recuperare e organizzare lo studio tra PC, iPad e iPhone.
 
----
+## Obiettivi
+- Tenere una lista ordinata delle lezioni ed esercitazioni perse, divise per materia e settimana.
+- Stimare il tempo reale di recupero in base alle durate effettive (slot 2h = 1h 30m, slot 3h = 2h 15m), alla velocità di riproduzione e all'obiettivo giornaliero.
+- Segnare lo stato di avanzamento di ogni lezione (`Da vedere`, `Vista`, `Appunti OK`, `Completata`) con argomento e note.
+- Pianificare le sessioni su Google Calendar o tramite file `.ics`.
+- Sincronizzare i dati tra più dispositivi usando Supabase (con fallback locale + backup JSON).
 
-## 1. Crea il database gratis su Supabase (2 minuti)
-1. Vai su [supabase.com](https://supabase.com), accedi con GitHub e clicca **New Project**.
-2. Scegli un nome (es. `recupero-lezioni`), regione **West EU (Ireland)** o **Central EU (Frankfurt)**, piano **Free ($0/mo)** e crea il progetto.
-3. Appena pronto, apri **SQL Editor** nella barra a sinistra, clicca **New query**, incolla tutto il contenuto del file `supabase_setup.sql` e premi **Run**.
-4. Vai in **Project Settings → API** e copia due valori:
-   - **Project URL** (`https://xxxx.supabase.co`)
-   - **Project API keys → `anon` `public`**
+## Struttura
+- `index.html` — interfaccia e logica della webapp (HTML + Tailwind CDN + Vanilla JS, nessun build step).
+- `config.js` — configurazione opzionale per Supabase (`SUPABASE_URL`, `SUPABASE_ANON_KEY`, `SYNC_KEY`).
+- `supabase_setup.sql` — tabella `study_state`, blocco RLS e funzioni RPC per il sync.
+- `manifest.json` / `icon.svg` — supporto PWA per aggiungerla alla schermata Home su iOS/iPadOS.
 
----
+## Setup
 
-## 2. Inserisci le chiavi in `config.js` (30 secondi)
-Apri `config.js` e incolla `SUPABASE_URL`, `SUPABASE_ANON_KEY` e una tua `SYNC_KEY` personale (es. una parola/codice che conosci solo tu, così nessuno può sovrascrivere i tuoi dati).
+### 1. Database su Supabase
+1. Crea un progetto su [supabase.com](https://supabase.com) (piano Free).
+2. Apri **SQL Editor** ed esegui il contenuto di `supabase_setup.sql`.
+3. In **Project Settings → API** recupera `Project URL` e la chiave `anon public`.
 
-> **Nota privacy:** Se il repository GitHub è pubblico, chiunque può leggere `config.js`. Per un tracker personale di lezioni va benissimo se usi una `SYNC_KEY` lunga e casuale, oppure puoi lasciare `config.js` vuoto e inserire le credenziali una volta sola dentro l'app dal tasto **Cloud Sync** (vengono salvate in `localStorage` sul dispositivo).
+### 2. Configurazione Sync
+Puoi inserire `SUPABASE_URL`, `SUPABASE_ANON_KEY` e una `SYNC_KEY` personale direttamente in `config.js`, oppure lasciare `config.js` vuoto e inserirli una volta sola dall'app tramite il pulsante **Sync** (restano salvati in `localStorage` sul dispositivo).
 
----
+### 3. Pubblicazione su GitHub Pages
+1. Carica i file nella root del repository (`index.html`, `config.js`, `manifest.json`, `icon.svg`).
+2. Vai su **Settings → Pages**, seleziona il branch `main` e la cartella `/ (root)`.
 
-## 3. Pubblica gratis su GitHub Pages (2 minuti)
-1. Crea un nuovo repository su GitHub (es. `recupero-lezioni`).
-2. Carica tutti i file di questa cartella (`index.html`, `config.js`, `manifest.json`, `icon.svg`) direttamente nella root del repository (o fai `git push`).
-3. Nel repository vai su **Settings → Pages**.
-4. Sotto **Build and deployment → Source**, scegli **Deploy from a branch**, seleziona **`main`** e cartella **`/ (root)`**, poi clicca **Save**.
-5. Dopo ~60 secondi la tua app sarà online all'indirizzo:
-   `https://<tuo-username>.github.io/recupero-lezioni/`
+Su iPhone/iPad basta aprire la pagina in Safari e usare **Condividi → Aggiungi alla schermata Home**.
 
----
-
-## 4. Installala su iPhone e iPad come app nativa
-1. Apri il link di GitHub Pages su **Safari**.
-2. Tocca il pulsante **Condividi** (quadrato con freccia in su) → **Aggiungi alla schermata Home**.
-3. Si aprirà a schermo intero senza barra del browser e resterà sincronizzata automaticamente con il PC.
-
----
-
-## Nota sul piano Free di Supabase
-Supabase mette in pausa i progetti gratuiti solo dopo **7 giorni consecutivi di totale inattività**. Se usi l'app almeno una volta a settimana resta sempre attivo; se mai andasse in pausa (es. dopo le vacanze), basta cliccare **Restore project** dalla dashboard Supabase.
+> Nota: sul piano gratuito Supabase mette in pausa il progetto dopo 7 giorni di inattività (si riattiva con un clic dalla dashboard).
