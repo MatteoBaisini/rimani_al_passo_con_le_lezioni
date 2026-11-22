@@ -535,20 +535,25 @@
               class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
           </div>
           <div>
-            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Supabase Anon Public Key</label>
-            <input id="sbKey" type="password" placeholder="eyJhbGciOi..."
+            <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Supabase Anon / Publishable Key</label>
+            <input id="sbKey" type="password" placeholder="sb_publishable_... oppure eyJhbGciOi..." autocomplete="off"
               class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
           </div>
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Chiave Sync Personale (SYNC_KEY)</label>
-            <input id="sbSyncKey" type="text" placeholder="matteo-polimi-2026"
-              class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
+            <div class="flex gap-2">
+              <input id="sbSyncKey" type="text" placeholder="Almeno 24 caratteri" autocomplete="off" autocapitalize="off" spellcheck="false"
+                class="flex-1 min-w-0 px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[12.5px] font-mono focus:outline-none" />
+              <button type="button" onclick="generateSyncKey()" title="Genera una chiave casuale"
+                class="px-3 py-2 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05] shrink-0">Genera chiave</button>
+            </div>
+            <p class="mt-1 text-[11px] text-[#8E8E93]">È l'unico segreto dei tuoi dati: usa la stessa su tutti i dispositivi e non pubblicarla in <span class="font-mono">config.js</span>.</p>
           </div>
         </div>
         <div class="flex flex-wrap gap-2">
           <button onclick="saveAndSync()" class="px-3.5 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium">Salva e Sincronizza</button>
-          <button onclick="pullFromSupabase(false, true)" title="Sovrascrive i dati locali con quelli sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Scarica (forza)</button>
-          <button onclick="pushToSupabase(false)" title="Invia i dati di questo dispositivo sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Invia (forza)</button>
+          <button onclick="syncWithSupabase({ silent: false, mode: 'pull' })" title="Sovrascrive i dati locali con quelli sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Scarica (forza)</button>
+          <button onclick="syncWithSupabase({ silent: false, mode: 'push' })" title="Invia i dati di questo dispositivo sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Invia (forza)</button>
         </div>
         <div id="syncDiag" class="hidden p-2.5 rounded-lg border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[11.5px] font-mono text-[#52525B] dark:text-[#A1A1AA] break-all"></div>
 
@@ -581,6 +586,13 @@
     // =========================================================================
     const STORAGE_KEY = 'recupero_lezioni_state_v2';
     const SYNC_CFG_KEY = 'recupero_lezioni_sync_cfg_v1';
+    const MIN_SYNC_KEY_LEN = 24; // must match supabase_setup.sql
+
+    // Validation for data loaded from storage / cloud / backup (see sanitizeState)
+    const SAFE_ID_RE = /^[A-Za-z0-9_-]{1,80}$/;
+    const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}$/;
+    const ISO_DATETIME_RE = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}$/;
+    const LESSON_TYPES = ['Lezione', 'Esercitazione', 'Laboratorio'];
 
     const STAGES = [
       { id: 0, label: 'Da vedere' },
@@ -719,10 +731,43 @@
       return true;
     }
 
+    // Ids and dates are interpolated into HTML/onclick attributes, so anything coming
+    // from localStorage, the cloud or an imported backup is validated before use.
+    function sanitizeState(targetState) {
+      if (!targetState || !Array.isArray(targetState.lessons)) return false;
+      const before = JSON.stringify(targetState);
+      targetState.lessons = targetState.lessons.filter(l =>
+        l && SAFE_ID_RE.test(String(l.id)) && ISO_DATE_RE.test(String(l.date))
+      );
+      targetState.lessons.forEach(l => {
+        l.courseId = String(l.courseId || '');
+        if (!LESSON_TYPES.includes(l.type)) l.type = 'Lezione';
+        const st = Number(l.stage);
+        l.stage = Number.isInteger(st) && st >= 0 && st <= 3 ? st : 0;
+        const dur = Number(l.duration);
+        l.duration = Number.isFinite(dur) && dur >= 15 && dur <= 600 ? dur : 90;
+        if (!ISO_DATETIME_RE.test(String(l.scheduled || ''))) l.scheduled = '';
+        l.topic = String(l.topic || '');
+        l.notes = String(l.notes || '');
+        l.url = normalizeUrl(l.url);
+        if (l.updatedAt && !Date.parse(l.updatedAt)) delete l.updatedAt;
+      });
+      if (!targetState.deletedLessons || typeof targetState.deletedLessons !== 'object' || Array.isArray(targetState.deletedLessons)) {
+        targetState.deletedLessons = {};
+      }
+      if (!SPEED_OPTIONS.includes(Number(targetState.speed))) targetState.speed = 1.25;
+      else targetState.speed = Number(targetState.speed);
+      const dh = Number(targetState.dailyHours);
+      targetState.dailyHours = Number.isFinite(dh) ? Math.max(0.5, Math.min(10, dh)) : 2.0;
+      if (targetState.theme !== 'dark') targetState.theme = 'light';
+      return JSON.stringify(targetState) !== before;
+    }
+
     function runMigrations(targetState) {
+      const m0 = sanitizeState(targetState);
       const m1 = migrateEffectiveDurations(targetState);
       const m2 = migrateLeaDiary(targetState);
-      return m1 || m2;
+      return m0 || m1 || m2;
     }
 
     function loadState() {
@@ -778,10 +823,15 @@
       try { local = JSON.parse(localStorage.getItem(SYNC_CFG_KEY) || '{}'); } catch (e) {}
       const fileCfg = window.APP_CONFIG || {};
       return {
-        url: (local.url || fileCfg.SUPABASE_URL || '').trim().replace(/\/$/, ''),
+        url: cleanSupabaseUrl(local.url || fileCfg.SUPABASE_URL),
         key: (local.key || fileCfg.SUPABASE_ANON_KEY || '').trim(),
         syncKey: (local.syncKey || fileCfg.SYNC_KEY || '').trim()
       };
+    }
+
+    // Accept URLs pasted with a trailing slash or the /rest/v1 suffix
+    function cleanSupabaseUrl(raw) {
+      return String(raw || '').trim().replace(/\/+$/, '').replace(/\/rest\/v1$/i, '').replace(/\/+$/, '');
     }
 
     function saveState(skipCloud = false) {
@@ -795,11 +845,10 @@
     }
 
     function scheduleCloudPush() {
-      const cfg = getSyncConfig();
-      if (!cfg.url || !cfg.key || !cfg.syncKey) return;
+      if (syncConfigError(getSyncConfig())) return;
       clearTimeout(syncTimer);
       setSyncUI('busy', 'Salvataggio...');
-      syncTimer = setTimeout(() => pushToSupabase(true), 800);
+      syncTimer = setTimeout(() => syncWithSupabase({ dirty: true }), 800);
     }
 
     function setSyncUI(status, text) {
@@ -841,24 +890,30 @@
       const allIds = new Set([...locMap.keys(), ...remMap.keys()]);
       const mergedLessons = [];
 
+      // A lesson without its own updatedAt has never been edited (e.g. a built-in default):
+      // it must lose against any edited copy, never borrow the state's global timestamp,
+      // otherwise a fresh device would overwrite real progress with pristine defaults.
+      // (Explicit check: Date.parse(0) is year 2000 in Chrome but NaN in Safari.)
+      const lessonTs = l => (l.updatedAt && Date.parse(l.updatedAt)) || 0;
+
       for (const id of allIds) {
         const lItem = locMap.get(id);
         const rItem = remMap.get(id);
         const delTs = deletedLessons[id] ? (Date.parse(deletedLessons[id]) || 0) : 0;
 
         if (lItem && rItem) {
-          const lTs = Date.parse(lItem.updatedAt || 0) || locGlobalTs;
-          const rTs = Date.parse(rItem.updatedAt || 0) || remGlobalTs;
+          const lTs = lessonTs(lItem);
+          const rTs = lessonTs(rItem);
           const winner = rTs > lTs ? rItem : lItem;
           const winTs = Math.max(lTs, rTs);
           if (delTs > winTs) continue;
           mergedLessons.push(winner);
         } else if (lItem) {
-          const lTs = Date.parse(lItem.updatedAt || 0) || locGlobalTs;
+          const lTs = lessonTs(lItem);
           if (delTs > lTs) continue;
           mergedLessons.push(lItem);
         } else if (rItem) {
-          const rTs = Date.parse(rItem.updatedAt || 0) || remGlobalTs;
+          const rTs = lessonTs(rItem);
           if (delTs > rTs) continue;
           mergedLessons.push(rItem);
         }
@@ -892,127 +947,158 @@
       return { merged, changedVsLocal, changedVsRemote };
     }
 
-    async function pushToSupabase(silent = false) {
-      const cfg = getSyncConfig();
-      if (!cfg.url || !cfg.key || !cfg.syncKey) {
-        if (!silent) toast('Inserisci URL, Anon Key e Sync Key');
-        return;
-      }
-      setSyncUI('busy', 'Invio...');
-      const headers = {
-        'apikey': cfg.key,
-        'Authorization': `Bearer ${cfg.key}`,
-        'Content-Type': 'application/json'
-      };
-      try {
-        let res = await fetch(`${cfg.url}/rest/v1/rpc/upsert_study_state`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({
-            p_sync_key: cfg.syncKey,
-            p_payload: state,
-            p_updated_at: state.updatedAt
-          })
-        });
-        if (res.status === 404) {
-          res = await fetch(`${cfg.url}/rest/v1/study_state?on_conflict=sync_key`, {
-            method: 'POST',
-            headers: { ...headers, 'Prefer': 'resolution=merge-duplicates' },
-            body: JSON.stringify({
-              sync_key: cfg.syncKey,
-              payload: state,
-              updated_at: state.updatedAt
-            })
-          });
-        }
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 180)}`);
-        setSyncUI('ok', 'Sincronizzato');
-        setSyncDiag(`OK · inviato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
-        if (!silent) toast('Dati salvati sul cloud');
-      } catch (err) {
-        console.error(err);
-        setSyncUI('err', 'Errore sync');
-        setSyncDiag(`Errore invio · ${err.message || err}`, true);
-        if (!silent) toast('Errore sync: controlla dettagli nella finestra Sync');
-      }
+    // ---- Supabase transport -------------------------------------------------
+    function syncConfigError(cfg) {
+      if (!cfg.url || !cfg.key || !cfg.syncKey) return 'Credenziali non configurate (modalità solo locale)';
+      if (!/^https?:\/\/[^/\s]+$/i.test(cfg.url)) return 'URL Supabase non valido: usa il formato https://xxxx.supabase.co';
+      if (cfg.syncKey.length < MIN_SYNC_KEY_LEN) return `SYNC_KEY troppo corta: servono almeno ${MIN_SYNC_KEY_LEN} caratteri (usa "Genera chiave")`;
+      return '';
     }
 
-    async function pullFromSupabase(silent = false, forceOverwriteLocal = false) {
+    function describeSbError(status, text) {
+      let info = {};
+      try { info = JSON.parse(text); } catch (e) {}
+      const msg = String(info.message || info.msg || info.error || text || '').slice(0, 160);
+      if (/Invalid sync_key/i.test(msg)) return `SYNC_KEY rifiutata dal server: deve avere almeno ${MIN_SYNC_KEY_LEN} caratteri`;
+      if (status === 404 || info.code === 'PGRST202') return `Funzione RPC non trovata (HTTP ${status}): esegui supabase_setup.sql nel SQL Editor di Supabase`;
+      if (/permission denied/i.test(msg)) return `Permesso negato (HTTP ${status}): riesegui supabase_setup.sql · ${msg}`;
+      if (status === 401 || status === 403) return `Chiave API rifiutata (HTTP ${status}): controlla la Anon/Publishable key in Project Settings → API · ${msg}`;
+      return `HTTP ${status} · ${msg}`;
+    }
+
+    async function sbRpc(cfg, fn, body) {
+      const headers = { 'apikey': cfg.key, 'Content-Type': 'application/json' };
+      // Legacy anon keys are JWTs and also go in Authorization. New publishable keys
+      // (sb_publishable_...) are not JWTs: sending them as Bearer makes the request fail.
+      if (cfg.key.startsWith('eyJ')) headers['Authorization'] = `Bearer ${cfg.key}`;
+      const payload = JSON.stringify(body); // snapshot now, before any await
+      const ctrl = new AbortController();
+      const timer = setTimeout(() => ctrl.abort(), 15000);
+      let res;
+      try {
+        res = await fetch(`${cfg.url}/rest/v1/rpc/${fn}`, { method: 'POST', headers, body: payload, signal: ctrl.signal });
+      } catch (e) {
+        throw new Error(e.name === 'AbortError'
+          ? 'Timeout: Supabase non risponde (progetto in pausa?)'
+          : 'Server non raggiungibile: sei offline, l\'URL è sbagliato o il progetto Supabase è in pausa');
+      } finally {
+        clearTimeout(timer);
+      }
+      const text = await res.text();
+      if (!res.ok) throw new Error(describeSbError(res.status, text));
+      return text ? JSON.parse(text) : null;
+    }
+
+    // ---- Sync orchestration -------------------------------------------------
+    // mode: 'merge' (default: download, merge, upload if needed)
+    //       'pull'  (overwrite this device with the cloud)
+    //       'push'  (overwrite the cloud with this device)
+    let syncInFlight = null;
+    let syncQueued = false;
+
+    async function syncWithSupabase({ silent = true, mode = 'merge', dirty = false } = {}) {
+      if (syncInFlight) {
+        if (mode === 'merge') {
+          // A local edit during a running sync must not be lost: run once more afterwards
+          if (dirty) syncQueued = true;
+          return syncInFlight;
+        }
+        while (syncInFlight) await syncInFlight;
+      }
+      syncInFlight = runSync(silent, mode).finally(() => {
+        syncInFlight = null;
+        if (syncQueued) {
+          syncQueued = false;
+          syncWithSupabase({ silent: true });
+        }
+      });
+      return syncInFlight;
+    }
+
+    function applyLocalState(next) {
+      state = next;
+      try { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); } catch (e) {}
+      applyTheme();
+      render();
+    }
+
+    async function runSync(silent, mode) {
       const cfg = getSyncConfig();
-      if (!cfg.url || !cfg.key || !cfg.syncKey) {
-        setSyncUI('', 'Solo locale');
-        setSyncDiag('Credenziali non configurate (modalità solo locale)');
+      const cfgErr = syncConfigError(cfg);
+      if (cfgErr) {
+        const unconfigured = !cfg.url || !cfg.key || !cfg.syncKey;
+        setSyncUI(unconfigured ? '' : 'err', unconfigured ? 'Solo locale' : 'Config. errata');
+        setSyncDiag(cfgErr, !unconfigured);
+        if (!silent) toast(unconfigured ? 'Inserisci URL, chiave API e SYNC_KEY' : cfgErr);
         return;
       }
-      setSyncUI('busy', 'Verifica...');
-      const headers = {
-        'apikey': cfg.key,
-        'Authorization': `Bearer ${cfg.key}`,
-        'Content-Type': 'application/json'
+
+      const time = () => new Date().toLocaleTimeString('it-IT');
+      const done = (diag, msg) => {
+        setSyncUI('ok', 'Sincronizzato');
+        setSyncDiag(`OK · ${diag} alle ${time()} (${state.lessons.length} lezioni)`);
+        if (!silent) toast(msg);
       };
+      const upload = () => sbRpc(cfg, 'upsert_study_state', {
+        p_sync_key: cfg.syncKey,
+        p_payload: state,
+        p_updated_at: state.updatedAt || new Date().toISOString()
+      });
+
+      setSyncUI('busy', 'Sincronizzazione...');
       try {
-        let res = await fetch(`${cfg.url}/rest/v1/rpc/get_study_state`, {
-          method: 'POST',
-          headers,
-          body: JSON.stringify({ p_sync_key: cfg.syncKey })
-        });
-        if (res.status === 404) {
-          res = await fetch(`${cfg.url}/rest/v1/study_state?sync_key=eq.${encodeURIComponent(cfg.syncKey)}&select=payload,updated_at`, {
-            headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
-          });
+        if (mode === 'push') {
+          delete state.isFreshDefault;
+          if (!state.updatedAt) state.updatedAt = new Date().toISOString();
+          applyLocalState(state);
+          await upload();
+          done('inviato', 'Dati del dispositivo inviati al cloud');
+          return;
         }
-        if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 180)}`);
-        const rows = await res.json();
-        if (!Array.isArray(rows) || rows.length === 0) {
-          if (forceOverwriteLocal) {
+
+        const rows = await sbRpc(cfg, 'get_study_state', { p_sync_key: cfg.syncKey });
+        const remote = Array.isArray(rows) && rows[0] ? rows[0].payload : null;
+
+        if (!remote || !Array.isArray(remote.lessons)) {
+          if (mode === 'pull') {
             setSyncUI('ok', 'Cloud vuoto');
-            setSyncDiag(`Nessun dato trovato su Supabase per SYNC_KEY="${cfg.syncKey}"`, true);
+            setSyncDiag('Nessun dato sul cloud per questa SYNC_KEY', true);
             if (!silent) toast('Nessun dato sul cloud per questa SYNC_KEY');
             return;
           }
+          // First device for this key: the cloud starts from this device's data
           delete state.isFreshDefault;
           if (!state.updatedAt) state.updatedAt = new Date().toISOString();
-          await pushToSupabase(true);
+          applyLocalState(state);
+          await upload();
+          done('primo invio', 'Dati salvati sul cloud');
           return;
         }
-        const remote = rows[0].payload;
-        if (remote && Array.isArray(remote.lessons)) {
-          if (forceOverwriteLocal || state.isFreshDefault) {
-            const next = JSON.parse(JSON.stringify(remote));
-            const migrated = runMigrations(next);
-            delete next.isFreshDefault;
-            state = next;
-            if (!state.updatedAt) state.updatedAt = new Date().toISOString();
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            applyTheme();
-            render();
-            if (migrated) await pushToSupabase(true);
-            setSyncUI('ok', 'Sincronizzato');
-            setSyncDiag(`OK · scaricato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
-            if (!silent) toast('Dati scaricati dal cloud');
-            return;
-          }
-          const { merged, changedVsLocal, changedVsRemote } = mergeStates(state, remote);
-          if (changedVsLocal) {
-            state = merged;
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-            applyTheme();
-            render();
-          }
-          if (changedVsRemote) {
-            await pushToSupabase(true);
-            if (!silent) toast(changedVsLocal ? 'Sincronizzato e unito' : 'Aggiornato sul cloud');
-            return;
-          }
-          setSyncDiag(`OK · verificato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
-          if (!silent) toast(changedVsLocal ? 'Aggiornato dal cloud' : 'Già aggiornato');
+
+        if (mode === 'pull' || state.isFreshDefault) {
+          const next = JSON.parse(JSON.stringify(remote));
+          const migrated = runMigrations(next);
+          delete next.isFreshDefault;
+          if (!next.updatedAt) next.updatedAt = new Date().toISOString();
+          applyLocalState(next);
+          if (migrated) await upload();
+          done('scaricato', 'Dati scaricati dal cloud');
+          return;
         }
-        setSyncUI('ok', 'Sincronizzato');
+
+        const { merged, changedVsLocal, changedVsRemote } = mergeStates(state, remote);
+        if (changedVsLocal) applyLocalState(merged);
+        if (changedVsRemote) await upload();
+        done('sincronizzato',
+          changedVsLocal && changedVsRemote ? 'Sincronizzato e unito'
+            : changedVsLocal ? 'Aggiornato dal cloud'
+            : changedVsRemote ? 'Aggiornato sul cloud'
+            : 'Già aggiornato');
       } catch (err) {
         console.error(err);
-        setSyncUI('err', 'Offline / Errore');
-        setSyncDiag(`Errore lettura · ${err.message || err}`, true);
-        if (!silent) toast('Impossibile leggere dal cloud');
+        setSyncUI('err', 'Errore sync');
+        setSyncDiag(`Errore · ${err.message || err}`, true);
+        if (!silent) toast('Errore sync: dettagli nella finestra Sync');
       }
     }
 
@@ -1551,7 +1637,7 @@
           <div onclick="openDrawer('${l.id}')"
             class="group px-3 sm:px-5 py-2.5 flex items-center gap-3 sm:gap-4 cursor-pointer hover:bg-porcelain/60 dark:hover:bg-cardDarkHover transition">
 
-            <button onclick="cycleStage(event, '${l.id}')" title="${STAGES[l.stage].label} — clicca per avanzare"
+            <button onclick="cycleStage(event, '${l.id}')" title="${STAGES[l.stage].label} — ${l.stage >= 3 ? 'clicca per modificare' : 'clicca per avanzare'}"
               class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-black/[0.05] dark:hover:bg-white/[0.07] shrink-0 transition">
               ${stageRingSVG(l.stage)}
             </button>
@@ -1643,7 +1729,12 @@
       ev.stopPropagation();
       const l = state.lessons.find(x => x.id === id);
       if (!l) return;
-      l.stage = (l.stage + 1) % 4;
+      // Never wrap Completata -> Da vedere on a single click: open the detail instead
+      if (l.stage >= 3) {
+        openDrawer(id);
+        return;
+      }
+      l.stage += 1;
       l.updatedAt = new Date().toISOString();
       saveState();
       toast(`Stato: ${STAGES[l.stage].label}`);
@@ -2191,12 +2282,31 @@
 
     async function saveAndSync() {
       const cfg = {
-        url: document.getElementById('sbUrl').value.trim().replace(/\/$/, ''),
+        url: cleanSupabaseUrl(document.getElementById('sbUrl').value),
         key: document.getElementById('sbKey').value.trim(),
         syncKey: document.getElementById('sbSyncKey').value.trim()
       };
-      localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg));
-      await pullFromSupabase(false);
+      // Everything empty = deliberately local-only; otherwise validate before saving
+      if (cfg.url || cfg.key || cfg.syncKey) {
+        const err = syncConfigError(cfg);
+        if (err) {
+          setSyncDiag(err, true);
+          toast(err);
+          return;
+        }
+      }
+      try { localStorage.setItem(SYNC_CFG_KEY, JSON.stringify(cfg)); } catch (e) {}
+      await syncWithSupabase({ silent: false });
+    }
+
+    // 24 symbols from a 32-char alphabet (no 0/o/1/l) = 120 bits, shown as 4 groups of 6
+    function generateSyncKey() {
+      const alphabet = 'abcdefghijkmnpqrstuvwxyz23456789';
+      const bytes = new Uint8Array(24);
+      crypto.getRandomValues(bytes);
+      const chars = Array.from(bytes, b => alphabet[b % 32]).join('');
+      document.getElementById('sbSyncKey').value = chars.match(/.{6}/g).join('-');
+      toast('Chiave generata: copiala sugli altri dispositivi');
     }
 
     function exportJSON() {
@@ -2217,9 +2327,11 @@
           if (!Array.isArray(parsed.lessons)) throw new Error('Formato non valido');
           runMigrations(parsed);
           state = parsed;
-          saveState();
+          saveState(true);
           closeAllOverlays();
           toast('Backup importato');
+          // Restoring a backup replaces the cloud copy too (no-op when sync isn't configured)
+          if (!syncConfigError(getSyncConfig())) syncWithSupabase({ mode: 'push' });
         } catch (err) {
           toast('File JSON non valido');
         }
@@ -2249,15 +2361,15 @@
       }
     });
 
-    window.addEventListener('focus', () => pullFromSupabase(true));
+    window.addEventListener('focus', () => syncWithSupabase());
     document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') pullFromSupabase(true);
+      if (document.visibilityState === 'visible') syncWithSupabase();
     });
 
     // Init
     applyTheme();
     render();
-    pullFromSupabase(true);
+    syncWithSupabase();
   </script>
 </body>
 </html>

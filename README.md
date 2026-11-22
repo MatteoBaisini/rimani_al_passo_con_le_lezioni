@@ -23,7 +23,9 @@ Webapp personale per tenere traccia delle lezioni universitarie (PoliMi) da recu
 3. In **Project Settings → API** recupera `Project URL` e la chiave `anon public`.
 
 ### 2. Configurazione Sync
-Puoi inserire `SUPABASE_URL`, `SUPABASE_ANON_KEY` e una `SYNC_KEY` personale direttamente in `config.js`, oppure lasciare `config.js` vuoto e inserirli una volta sola dall'app tramite il pulsante **Sync** (restano salvati in `localStorage` sul dispositivo).
+Puoi inserire `SUPABASE_URL` e `SUPABASE_ANON_KEY` direttamente in `config.js` (la anon key è pubblica per design), oppure inserirli dall'app tramite il pulsante **Sync**.
+
+La `SYNC_KEY` è l'unico segreto che protegge i tuoi dati: **non metterla mai in `config.js`**, che su GitHub Pages è leggibile da chiunque. Inseriscila dall'app (pulsante **Sync** → **Genera chiave**) su un dispositivo, poi copia la stessa chiave sugli altri. Deve avere almeno 24 caratteri e resta salvata solo nel `localStorage` del dispositivo.
 
 ### 3. Pubblicazione su GitHub Pages
 1. Carica i file nella root del repository (`index.html`, `config.js`, `manifest.json`, `icon.svg`).

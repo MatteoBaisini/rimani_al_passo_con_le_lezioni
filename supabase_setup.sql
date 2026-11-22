@@ -2,6 +2,8 @@
 -- Mantiene la stessa tabella `public.study_state`, ma blocca l'accesso diretto
 -- via REST (impedendo `SELECT *` sulla tabella) esponendo solo due RPC protette
 -- che operano esclusivamente sulla `sync_key` fornita.
+-- La `sync_key` è l'unico segreto: deve avere almeno 24 caratteri (meglio se
+-- generata casualmente dall'app) e non va mai pubblicata in `config.js`.
 
 create table if not exists public.study_state (
   sync_key text primary key,
@@ -27,7 +29,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if p_sync_key is null or length(trim(p_sync_key)) < 4 then
+  if p_sync_key is null or length(trim(p_sync_key)) < 24 then
     raise exception 'Invalid sync_key';
   end if;
 
@@ -51,7 +53,7 @@ security definer
 set search_path = public
 as $$
 begin
-  if p_sync_key is null or length(trim(p_sync_key)) < 4 then
+  if p_sync_key is null or length(trim(p_sync_key)) < 24 then
     raise exception 'Invalid sync_key';
   end if;
 
