@@ -547,9 +547,10 @@
         </div>
         <div class="flex flex-wrap gap-2">
           <button onclick="saveAndSync()" class="px-3.5 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium">Salva e Sincronizza</button>
-          <button onclick="pullFromSupabase(false)" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Scarica</button>
-          <button onclick="pushToSupabase(false)" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Invia</button>
+          <button onclick="pullFromSupabase(false, true)" title="Sovrascrive i dati locali con quelli sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Scarica (forza)</button>
+          <button onclick="pushToSupabase(false)" title="Invia i dati di questo dispositivo sul cloud" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium hover:bg-black/[0.03] dark:hover:bg-white/[0.05]">Invia (forza)</button>
         </div>
+        <div id="syncDiag" class="hidden p-2.5 rounded-lg border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[11.5px] font-mono text-[#52525B] dark:text-[#A1A1AA] break-all"></div>
 
         <div class="pt-4 border-t border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between gap-2">
           <span class="text-[12px] font-medium text-[#71717A] dark:text-[#A1A1AA]">Backup manuale JSON</span>
@@ -747,8 +748,29 @@
         theme: 'light',
         effectiveDurationMigrated: true,
         leaDiaryMigrated: true,
-        updatedAt: new Date().toISOString()
+        isFreshDefault: true,
+        updatedAt: null
       };
+    }
+
+    let lastSyncDiag = '';
+
+    function setSyncDiag(msg, isErr = false) {
+      lastSyncDiag = msg || '';
+      const el = document.getElementById('syncDiag');
+      if (!el) return;
+      if (!lastSyncDiag) {
+        el.classList.add('hidden');
+        el.textContent = '';
+        return;
+      }
+      el.classList.remove('hidden');
+      el.className = `p-2.5 rounded-lg border text-[11.5px] font-mono break-all ${
+        isErr
+          ? 'border-red-500/30 bg-red-500/5 text-red-700 dark:text-red-300'
+          : 'border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[#52525B] dark:text-[#A1A1AA]'
+      }`;
+      el.textContent = lastSyncDiag;
     }
 
     function getSyncConfig() {
@@ -763,6 +785,7 @@
     }
 
     function saveState(skipCloud = false) {
+      delete state.isFreshDefault;
       state.updatedAt = new Date().toISOString();
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
@@ -902,20 +925,23 @@
             })
           });
         }
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 180)}`);
         setSyncUI('ok', 'Sincronizzato');
+        setSyncDiag(`OK · inviato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
         if (!silent) toast('Dati salvati sul cloud');
       } catch (err) {
         console.error(err);
         setSyncUI('err', 'Errore sync');
-        if (!silent) toast('Errore sync: controlla credenziali o permessi');
+        setSyncDiag(`Errore invio · ${err.message || err}`, true);
+        if (!silent) toast('Errore sync: controlla dettagli nella finestra Sync');
       }
     }
 
-    async function pullFromSupabase(silent = false) {
+    async function pullFromSupabase(silent = false, forceOverwriteLocal = false) {
       const cfg = getSyncConfig();
       if (!cfg.url || !cfg.key || !cfg.syncKey) {
         setSyncUI('', 'Solo locale');
+        setSyncDiag('Credenziali non configurate (modalità solo locale)');
         return;
       }
       setSyncUI('busy', 'Verifica...');
@@ -935,14 +961,37 @@
             headers: { 'apikey': cfg.key, 'Authorization': `Bearer ${cfg.key}` }
           });
         }
-        if (!res.ok) throw new Error(await res.text());
+        if (!res.ok) throw new Error(`HTTP ${res.status}: ${(await res.text()).slice(0, 180)}`);
         const rows = await res.json();
         if (!Array.isArray(rows) || rows.length === 0) {
+          if (forceOverwriteLocal) {
+            setSyncUI('ok', 'Cloud vuoto');
+            setSyncDiag(`Nessun dato trovato su Supabase per SYNC_KEY="${cfg.syncKey}"`, true);
+            if (!silent) toast('Nessun dato sul cloud per questa SYNC_KEY');
+            return;
+          }
+          delete state.isFreshDefault;
+          if (!state.updatedAt) state.updatedAt = new Date().toISOString();
           await pushToSupabase(true);
           return;
         }
         const remote = rows[0].payload;
         if (remote && Array.isArray(remote.lessons)) {
+          if (forceOverwriteLocal || state.isFreshDefault) {
+            const next = JSON.parse(JSON.stringify(remote));
+            const migrated = runMigrations(next);
+            delete next.isFreshDefault;
+            state = next;
+            if (!state.updatedAt) state.updatedAt = new Date().toISOString();
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+            applyTheme();
+            render();
+            if (migrated) await pushToSupabase(true);
+            setSyncUI('ok', 'Sincronizzato');
+            setSyncDiag(`OK · scaricato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
+            if (!silent) toast('Dati scaricati dal cloud');
+            return;
+          }
           const { merged, changedVsLocal, changedVsRemote } = mergeStates(state, remote);
           if (changedVsLocal) {
             state = merged;
@@ -955,12 +1004,14 @@
             if (!silent) toast(changedVsLocal ? 'Sincronizzato e unito' : 'Aggiornato sul cloud');
             return;
           }
+          setSyncDiag(`OK · verificato alle ${new Date().toLocaleTimeString('it-IT')} (${state.lessons.length} lezioni)`);
           if (!silent) toast(changedVsLocal ? 'Aggiornato dal cloud' : 'Già aggiornato');
         }
         setSyncUI('ok', 'Sincronizzato');
       } catch (err) {
         console.error(err);
         setSyncUI('err', 'Offline / Errore');
+        setSyncDiag(`Errore lettura · ${err.message || err}`, true);
         if (!silent) toast('Impossibile leggere dal cloud');
       }
     }
@@ -2199,6 +2250,9 @@
     });
 
     window.addEventListener('focus', () => pullFromSupabase(true));
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') pullFromSupabase(true);
+    });
 
     // Init
     applyTheme();
