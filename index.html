@@ -7,6 +7,7 @@
 
   <!-- PWA / iOS Web App Meta Tags -->
   <meta name="theme-color" content="#F6F6F4" id="themeColorMeta" />
+  <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Recuperi" />
@@ -22,8 +23,29 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <style>
-    body { font-feature-settings: 'cv11', 'ss01', 'ss03'; }
+    body { font-feature-settings: 'cv11', 'ss01', 'ss03'; -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; overscroll-behavior-y: none; }
     .tabular-nums { font-variant-numeric: tabular-nums; }
+
+    /* Safe areas: with viewport-fit=cover, iPhone/iPad (especially when opened from the Home
+       screen) draw the page under the status bar and the home indicator. These insets keep
+       content out of those zones; elsewhere they are 0 and change nothing. */
+    :root {
+      --safe-t: env(safe-area-inset-top, 0px);
+      --safe-r: env(safe-area-inset-right, 0px);
+      --safe-b: env(safe-area-inset-bottom, 0px);
+      --safe-l: env(safe-area-inset-left, 0px);
+    }
+    /* 100vh is taller than the visible area in iOS standalone mode: use the dynamic height */
+    .app-min-h { min-height: 100vh; min-height: 100dvh; }
+    .safe-y { padding-top: var(--safe-t); padding-bottom: var(--safe-b); }
+    .safe-l { padding-left: var(--safe-l); }
+    .safe-r { padding-right: var(--safe-r); }
+    .safe-pb { padding-bottom: calc(5rem + var(--safe-b)); }
+    .topbar { height: calc(4rem + var(--safe-t)); padding-top: var(--safe-t); }
+    .modal-wrap {
+      padding: max(1rem, var(--safe-t)) max(1rem, var(--safe-r)) max(1rem, var(--safe-b)) max(1rem, var(--safe-l));
+    }
+    .toast-pos { right: max(1.25rem, var(--safe-r)); bottom: calc(1.25rem + var(--safe-b)); }
   </style>
 
   <!-- Tailwind CSS -->
@@ -63,13 +85,13 @@
   <!-- ===================================================================== -->
   <!-- APP SHELL: FIXED SIDEBAR (256px) + MAIN WORKSPACE                     -->
   <!-- ===================================================================== -->
-  <div class="flex min-h-screen w-full">
+  <div class="flex app-min-h w-full">
 
     <!-- =================================================================== -->
     <!-- LEFT SIDEBAR                                                        -->
     <!-- =================================================================== -->
     <aside id="sidebar"
-      class="fixed inset-y-0 left-0 z-50 w-[256px] shrink-0 bg-white/95 dark:bg-cardDark/95 backdrop-blur-md border-r border-black/[0.08] dark:border-white/[0.08] flex flex-col transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-screen transition-transform duration-200 ease-out">
+      class="fixed inset-y-0 left-0 z-50 w-[256px] shrink-0 bg-white/95 dark:bg-cardDark/95 backdrop-blur-md border-r border-black/[0.08] dark:border-white/[0.08] flex flex-col transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-[100dvh] safe-y safe-l transition-transform duration-200 ease-out">
 
       <!-- Brand Header -->
       <div class="h-16 px-4 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
@@ -81,7 +103,7 @@
           </div>
           <div class="min-w-0">
             <div class="text-[14px] font-semibold tracking-tight leading-tight truncate">Recupero Lezioni</div>
-            <div class="text-[10.5px] text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · 2026</div>
+            <div class="text-[10.5px] text-[#71717A] dark:text-[#8E8E93] tracking-wide">POLIMI · <span id="appVersion"></span></div>
           </div>
         </div>
         <div class="flex items-center gap-1 shrink-0">
@@ -183,7 +205,7 @@
     <div class="flex-1 min-w-0 flex flex-col">
 
       <!-- Sticky Topbar -->
-      <header class="sticky top-0 z-30 h-16 px-4 sm:px-7 border-b border-black/[0.07] dark:border-white/[0.07] bg-porcelain/85 dark:bg-obsidian/85 backdrop-blur-md flex items-center justify-between gap-3">
+      <header class="topbar sticky top-0 z-30 px-4 sm:px-7 border-b border-black/[0.07] dark:border-white/[0.07] bg-porcelain/85 dark:bg-obsidian/85 backdrop-blur-md flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <!-- Mobile Sidebar Button -->
           <button onclick="openMobileSidebar()" aria-label="Apri menu"
@@ -231,7 +253,7 @@
       </header>
 
       <!-- Main Scroll Content -->
-      <main class="flex-1 w-full max-w-[1060px] mx-auto px-4 sm:px-7 py-6 pb-20 space-y-6">
+      <main class="flex-1 w-full max-w-[1060px] mx-auto px-4 sm:px-7 py-6 safe-pb space-y-6">
 
         <!-- Next Up: the lesson to tackle first in the current scope -->
         <section id="nextUpSection" class="hidden">
@@ -298,7 +320,7 @@
   <!-- SLIDE-OVER DETAIL DRAWER                                              -->
   <!-- ===================================================================== -->
   <aside id="drawer" inert aria-hidden="true"
-    class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] bg-white dark:bg-cardDark border-l border-black/[0.08] dark:border-white/[0.08] shadow-float flex flex-col transform translate-x-full transition-transform duration-200 ease-out">
+    class="fixed inset-y-0 right-0 z-50 w-full sm:w-[420px] safe-y safe-r bg-white dark:bg-cardDark border-l border-black/[0.08] dark:border-white/[0.08] shadow-float flex flex-col transform translate-x-full transition-transform duration-200 ease-out">
     <div class="h-16 px-5 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
       <div id="drawerHeading" class="flex items-center gap-2 text-[14px] font-semibold truncate">Dettaglio lezione</div>
       <button onclick="closeAllOverlays()" aria-label="Chiudi"
@@ -336,8 +358,8 @@
   <!-- ===================================================================== -->
   <!-- MODAL: INTERACTIVE POLIMI TIMETABLE ("ORARIO POLIMI")                 -->
   <!-- ===================================================================== -->
-  <div id="timetableModal" class="fixed inset-0 z-50 hidden items-center justify-center p-3 sm:p-5 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-4xl max-h-[88vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+  <div id="timetableModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-wrap pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-4xl max-h-full flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
         <div>
           <h2 class="text-[15px] font-semibold tracking-tight">Orario PoliMi — Durate effettive</h2>
@@ -357,15 +379,15 @@
   <!-- ===================================================================== -->
   <!-- MODAL: ADD LESSON                                                     -->
   <!-- ===================================================================== -->
-  <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
-      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
+  <div id="addModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-wrap pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-full flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="shrink-0 px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
         <h2 class="text-[15px] font-semibold tracking-tight">Nuova lezione da recuperare</h2>
         <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="p-5 space-y-4">
+      <div class="p-5 space-y-4 overflow-y-auto">
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1">Materia</label>
@@ -420,7 +442,7 @@
             class="w-full px-3 py-2 rounded-lg border border-black/[0.09] dark:border-white/[0.09] bg-porcelain dark:bg-obsidian text-[13px] focus:outline-none" />
         </div>
       </div>
-      <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex justify-end gap-2">
+      <div class="shrink-0 px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex justify-end gap-2">
         <button onclick="closeAllOverlays()" class="px-3.5 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] text-[12.5px] font-medium">Annulla</button>
         <button onclick="confirmAddLesson()" class="px-4 py-1.5 rounded-lg bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium">Aggiungi</button>
       </div>
@@ -430,15 +452,15 @@
   <!-- ===================================================================== -->
   <!-- MODAL: GOOGLE CALENDAR SCHEDULER                                      -->
   <!-- ===================================================================== -->
-  <div id="calModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-md rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
-      <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
+  <div id="calModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-wrap pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-full flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+      <div class="shrink-0 px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between">
         <h2 class="text-[15px] font-semibold tracking-tight">Pianifica su Google Calendar</h2>
         <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
           <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="1.8" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
       </div>
-      <div class="p-5 space-y-4">
+      <div class="p-5 space-y-4 overflow-y-auto">
         <div id="calLessonSummary" class="text-[13.5px] font-semibold"></div>
         <div id="calQuickChips" class="flex flex-wrap gap-1.5"></div>
         <div class="grid grid-cols-2 gap-3">
@@ -459,7 +481,7 @@
         </label>
         <div id="calDurationInfo" class="p-3 rounded-xl border border-black/[0.07] dark:border-white/[0.07] bg-porcelain dark:bg-obsidian text-[12px] text-[#52525B] dark:text-[#A1A1AA] tabular-nums"></div>
       </div>
-      <div class="px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2">
+      <div class="shrink-0 px-5 py-3.5 border-t border-black/[0.07] dark:border-white/[0.07] bg-porcelain/60 dark:bg-obsidian/40 flex items-center justify-between gap-2">
         <div class="flex items-center gap-2">
           <button onclick="downloadICS()" class="px-3 py-1.5 rounded-lg border border-black/[0.08] dark:border-white/[0.08] bg-white dark:bg-cardDark hover:bg-black/[0.03] dark:hover:bg-cardDarkHover text-[12.5px] font-medium transition">
             Scarica .ics
@@ -481,8 +503,8 @@
   <!-- ===================================================================== -->
   <!-- MODAL: SMART PICK ("HO X MIN")                                        -->
   <!-- ===================================================================== -->
-  <div id="smartModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-md max-h-[85vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+  <div id="smartModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-wrap pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-full flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
         <div>
           <h2 class="text-[15px] font-semibold tracking-tight">Ho X minuti liberi</h2>
@@ -511,8 +533,8 @@
   <!-- ===================================================================== -->
   <!-- MODAL: CLOUD SYNC & BACKUP                                            -->
   <!-- ===================================================================== -->
-  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center p-4 pointer-events-none">
-    <div class="pointer-events-auto w-full max-w-md max-h-[88vh] flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
+  <div id="syncModal" class="fixed inset-0 z-50 hidden items-center justify-center modal-wrap pointer-events-none">
+    <div class="pointer-events-auto w-full max-w-md max-h-full flex flex-col rounded-2xl border border-black/[0.09] dark:border-white/[0.09] bg-white dark:bg-cardDark shadow-float overflow-hidden">
       <div class="px-5 py-4 border-b border-black/[0.07] dark:border-white/[0.07] flex items-center justify-between shrink-0">
         <h2 class="text-[15px] font-semibold tracking-tight">Cloud Sync &amp; Backup</h2>
         <button onclick="closeAllOverlays()" aria-label="Chiudi" class="w-8 h-8 rounded-lg flex items-center justify-center text-[#71717A] hover:bg-black/[0.05] dark:hover:bg-white/[0.07]">
@@ -570,7 +592,7 @@
   <!-- TOAST NOTIFICATION                                                    -->
   <!-- ===================================================================== -->
   <div id="toast"
-    class="fixed bottom-5 right-5 z-[100] px-4 py-2.5 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium shadow-float opacity-0 translate-y-2 pointer-events-none transition-all duration-200"></div>
+    class="toast-pos fixed z-[100] px-4 py-2.5 rounded-xl bg-[#111113] dark:bg-[#F4F4F5] text-white dark:text-[#0B0B0E] text-[12.5px] font-medium shadow-float opacity-0 translate-y-2 pointer-events-none transition-all duration-200"></div>
 
   <!-- ===================================================================== -->
   <!-- APPLICATION LOGIC (js/app.js e moduli collegati)                      -->
