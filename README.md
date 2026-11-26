@@ -5,7 +5,7 @@ Webapp personale per tenere traccia delle lezioni universitarie (PoliMi) da recu
 ## Obiettivi
 - Tenere una lista ordinata delle lezioni ed esercitazioni perse, divise per materia e settimana.
 - Stimare il tempo reale di recupero in base alle durate effettive (slot 2h = 1h 30m, slot 3h = 2h 15m), alla velocità di riproduzione e all'obiettivo giornaliero.
-- Segnare lo stato di avanzamento di ogni lezione (`Da vedere`, `Vista`, `Appunti OK`, `Completata`) con argomento e note.
+- Segnare lo stato di avanzamento di ogni lezione (`Da vedere`, `Iniziata`, `Completata`) con argomento e note.
 - Pianificare le sessioni su Google Calendar o tramite file `.ics`.
 - Sincronizzare i dati tra più dispositivi usando Supabase (con fallback locale + backup JSON).
 

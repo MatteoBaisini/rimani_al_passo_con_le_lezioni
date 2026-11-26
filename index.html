@@ -591,13 +591,13 @@
 
     const STAGES = [
       { id: 0, label: 'Da vedere' },
-      { id: 1, label: 'Vista' },
-      { id: 2, label: 'Appunti OK' },
-      { id: 3, label: 'Completata' }
+      { id: 1, label: 'Iniziata' },
+      { id: 2, label: 'Completata' }
     ];
+    const DONE_STAGE = STAGES.length - 1;
 
     // One green ramp for progress, so it never clashes with course colors (same hues as stageRingSVG)
-    const STAGE_COLORS = ['#A1A1AA', '#6EC9A4', '#10B981', '#047857'];
+    const STAGE_COLORS = ['#A1A1AA', '#6EC9A4', '#047857'];
 
     const SPEED_OPTIONS = [1, 1.25, 1.5, 1.75, 2];
 
@@ -796,6 +796,26 @@
       return true;
     }
 
+    // Old 4-step flow (Da vedere / Vista / Appunti OK / Completata) -> 3 steps
+    // (Da vedere / Iniziata / Completata): 1,2 -> 1 and 3 -> 2. Once migrated, any stray
+    // old value (e.g. pushed by a stale cached client) is clamped to Completata.
+    function migrateStages(targetState) {
+      if (!targetState || !Array.isArray(targetState.lessons)) return false;
+      let changed = false;
+      if (!targetState.stagesV2Migrated) {
+        targetState.lessons.forEach(l => {
+          const next = l.stage >= 3 ? 2 : (l.stage >= 1 ? 1 : 0);
+          if (next !== l.stage) { l.stage = next; changed = true; }
+        });
+        targetState.stagesV2Migrated = true;
+        return true;
+      }
+      targetState.lessons.forEach(l => {
+        if (l.stage > DONE_STAGE) { l.stage = DONE_STAGE; changed = true; }
+      });
+      return changed;
+    }
+
     // Ids and dates are interpolated into HTML/onclick attributes, so anything coming
     // from localStorage, the cloud or an imported backup is validated before use.
     function sanitizeState(targetState) {
@@ -834,7 +854,8 @@
       const m2 = migrateLeaDiary(targetState);
       const m3 = migrateAnalisiNoris(targetState);
       const m4 = migrateAnalisiEsercitazioni(targetState);
-      return m0 || m1 || m2 || m3 || m4;
+      const m5 = migrateStages(targetState);
+      return m0 || m1 || m2 || m3 || m4 || m5;
     }
 
     function loadState() {
@@ -862,6 +883,7 @@
         leaDiaryMigrated: true,
         analisiNorisMigrated: true,
         analisiEseMigrated: true,
+        stagesV2Migrated: true,
         isFreshDefault: true,
         updatedAt: null
       };
@@ -999,6 +1021,7 @@
         leaDiaryMigrated: true,
         analisiNorisMigrated: true,
         analisiEseMigrated: true,
+        stagesV2Migrated: true,
         updatedAt: new Date(Math.max(locGlobalTs, remGlobalTs)).toISOString()
       };
 
@@ -1265,12 +1288,6 @@
           <path d="M12 3.5A8.5 8.5 0 0 1 12 20.5Z" fill="currentColor" />
         </svg>`;
       }
-      if (stage === 2) {
-        return `<svg class="w-[18px] h-[18px] text-[#10B981]" viewBox="0 0 24 24" fill="none">
-          <circle cx="12" cy="12" r="8.5" stroke="currentColor" stroke-width="1.75" />
-          <path d="M12 3.5A8.5 8.5 0 1 1 3.5 12H12V3.5Z" fill="currentColor" />
-        </svg>`;
-      }
       return `<svg class="w-[18px] h-[18px] text-[#047857] dark:text-[#10B981]" viewBox="0 0 24 24" fill="none">
         <circle cx="12" cy="12" r="8.5" fill="currentColor" />
         <path d="M8.5 12.2l2.3 2.3 4.7-4.8" stroke="#FFFFFF" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -1288,13 +1305,13 @@
     function getFilteredLessons() {
       return state.lessons
         .filter(l => {
-          if (ui.view === 'scheduled') return Boolean(l.scheduled) && l.stage < 3;
+          if (ui.view === 'scheduled') return Boolean(l.scheduled) && l.stage < DONE_STAGE;
           if (ui.view !== 'all' && l.courseId !== ui.view) return false;
           return true;
         })
         .filter(l => {
-          if (ui.filter === 'open') return l.stage < 3;
-          if (ui.filter === 'done') return l.stage === 3;
+          if (ui.filter === 'open') return l.stage < DONE_STAGE;
+          if (ui.filter === 'done') return l.stage === DONE_STAGE;
           return true;
         })
         .filter(l => {
@@ -1323,7 +1340,7 @@
     }
 
     function renderSidebar() {
-      const openAll = state.lessons.filter(l => l.stage < 3);
+      const openAll = state.lessons.filter(l => l.stage < DONE_STAGE);
       document.getElementById('cnt-all').textContent = openAll.length;
       document.getElementById('cnt-scheduled').textContent = openAll.filter(l => l.scheduled).length;
 
@@ -1374,7 +1391,7 @@
 
     function renderHeaderAndKPIs() {
       const scopeLessons = getScopedLessons();
-      const scopeOpen = scopeLessons.filter(l => l.stage < 3);
+      const scopeOpen = scopeLessons.filter(l => l.stage < DONE_STAGE);
 
       const baseMins = scopeOpen.reduce((s, l) => s + (l.duration || 90), 0);
       const adjMins = scopeOpen.reduce((s, l) => s + effMinutes(l.duration || 90), 0);
@@ -1428,13 +1445,13 @@
 
       // Overall Completion Bar
       const total = scopeLessons.length;
-      const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / 3), 0);
+      const weightedDone = scopeLessons.reduce((acc, l) => acc + (l.stage / DONE_STAGE), 0);
       const pct = total === 0 ? 100 : Math.round((weightedDone / total) * 100);
       document.getElementById('overallPctText').textContent = pct === null ? '—' : `${pct}%`;
 
       // One segment per started stage (done first), "Da vedere" is the empty track
       const stageCounts = STAGES.map(s => scopeLessons.filter(l => l.stage === s.id).length);
-      document.getElementById('overallProgressBar').innerHTML = total === 0 ? '' : [3, 2, 1]
+      document.getElementById('overallProgressBar').innerHTML = total === 0 ? '' : [2, 1]
         .filter(s => stageCounts[s] > 0)
         .map(s => `<div class="h-full transition-all duration-300" style="width:${(stageCounts[s] / total) * 100}%; background:${STAGE_COLORS[s]}" title="${STAGES[s].label}: ${stageCounts[s]}"></div>`)
         .join('');
@@ -1450,7 +1467,7 @@
     // Priority: soonest calendar session, then already-started lessons, then the oldest backlog item
     function getNextUp() {
       const open = getScopedLessons()
-        .filter(l => l.stage < 3 && (ui.view !== 'scheduled' || l.scheduled))
+        .filter(l => l.stage < DONE_STAGE && (ui.view !== 'scheduled' || l.scheduled))
         .sort((a, b) => a.date.localeCompare(b.date));
       const scheduled = open.filter(l => l.scheduled).sort((a, b) => a.scheduled.localeCompare(b.scheduled));
       if (scheduled.length) return { lesson: scheduled[0], reason: `In calendario ${formatScheduled(scheduled[0].scheduled)}` };
@@ -1485,7 +1502,7 @@
       const effMin = effMinutes(l.duration || c.defaultDuration);
       const nextStage = STAGES[l.stage + 1];
 
-      const actionLabels = ['', 'Segna come vista', 'Appunti completati', 'Segna completata'];
+      const actionLabels = ['', 'Segna iniziata', 'Segna completata'];
       const btnBase = 'inline-flex items-center justify-center gap-1.5 h-9 px-3.5 rounded-lg text-[13px] font-medium transition';
 
       sec.innerHTML = `
@@ -1540,11 +1557,11 @@
 
       document.getElementById('courseOverviewGrid').innerHTML = COURSES.map(c => {
         const all = state.lessons.filter(l => l.courseId === c.id);
-        const open = all.filter(l => l.stage < 3);
-        const done = all.filter(l => l.stage === 3);
+        const open = all.filter(l => l.stage < DONE_STAGE);
+        const done = all.filter(l => l.stage === DONE_STAGE);
         const adjMins = open.reduce((s, l) => s + effMinutes(l.duration || c.defaultDuration), 0);
         // Stage-weighted, same metric as the overall bar
-        const pct = all.length === 0 ? 0 : Math.round(all.reduce((s, l) => s + l.stage / 3, 0) / all.length * 100);
+        const pct = all.length === 0 ? 0 : Math.round(all.reduce((s, l) => s + l.stage / DONE_STAGE, 0) / all.length * 100);
 
         return `
           <button onclick="setView('${c.id}')"
@@ -1574,9 +1591,9 @@
       const scope = getScopedLessons().filter(l => ui.view !== 'scheduled' || l.scheduled);
       const labels = { open: 'Da recuperare', all: 'Tutte', done: 'Completate' };
       const counts = {
-        open: scope.filter(l => l.stage < 3).length,
+        open: scope.filter(l => l.stage < DONE_STAGE).length,
         all: scope.length,
-        done: scope.filter(l => l.stage === 3).length
+        done: scope.filter(l => l.stage === DONE_STAGE).length
       };
       document.querySelectorAll('#stageFilter button').forEach(btn => {
         const f = btn.dataset.filter;
@@ -1638,7 +1655,7 @@
         <div class="bg-white dark:bg-cardDark border border-black/[0.08] dark:border-white/[0.08] rounded-2xl shadow-card overflow-hidden">
           ${groups.map(g => {
             const openMins = g.lessons
-              .filter(l => l.stage < 3)
+              .filter(l => l.stage < DONE_STAGE)
               .reduce((s, l) => s + effMinutes(l.duration || getCourse(l.courseId).defaultDuration), 0);
             return `
               <div class="px-4 sm:px-5 py-2 flex items-center justify-between gap-3 bg-porcelain/70 dark:bg-white/[0.025] border-y border-black/[0.06] dark:border-white/[0.06] first:border-t-0">
@@ -1660,7 +1677,7 @@
         const c = getCourse(l.courseId);
         const baseMin = l.duration || c.defaultDuration;
         const effMin = effMinutes(baseMin);
-        const isDone = l.stage === 3;
+        const isDone = l.stage === DONE_STAGE;
 
         const [weekday, , month] = formatDateReadable(l.date).split(' ');
 
@@ -1668,7 +1685,7 @@
           <div onclick="openDrawer('${l.id}')"
             class="group px-3 sm:px-5 py-2.5 flex items-center gap-3 sm:gap-4 cursor-pointer hover:bg-porcelain/60 dark:hover:bg-cardDarkHover transition">
 
-            <button onclick="cycleStage(event, '${l.id}')" title="${STAGES[l.stage].label} — ${l.stage >= 3 ? 'clicca per modificare' : 'clicca per avanzare'}"
+            <button onclick="cycleStage(event, '${l.id}')" title="${STAGES[l.stage].label} — ${l.stage >= DONE_STAGE ? 'clicca per modificare' : 'clicca per avanzare'}"
               class="w-8 h-8 rounded-lg flex items-center justify-center hover:bg-black/[0.05] dark:hover:bg-white/[0.07] shrink-0 transition">
               ${stageRingSVG(l.stage)}
             </button>
@@ -1761,7 +1778,7 @@
       const l = state.lessons.find(x => x.id === id);
       if (!l) return;
       // Never wrap Completata -> Da vedere on a single click: open the detail instead
-      if (l.stage >= 3) {
+      if (l.stage >= DONE_STAGE) {
         openDrawer(id);
         return;
       }
@@ -1891,7 +1908,7 @@
       document.getElementById('drawerBody').innerHTML = `
         <div>
           <label class="block text-[11.5px] font-medium text-[#71717A] dark:text-[#A1A1AA] mb-1.5">Stato avanzamento</label>
-          <div class="grid grid-cols-4 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06]">
+          <div class="grid grid-cols-3 gap-1 p-1 rounded-xl bg-black/[0.04] dark:bg-white/[0.06]">
             ${STAGES.map(s => `
               <button type="button" data-set-stage="${s.id}" data-active="${l.stage === s.id ? '1' : '0'}" onclick="selectDrawerStage(${s.id})"
                 class="py-1.5 rounded-lg text-[11.5px] font-medium transition ${
@@ -2227,7 +2244,7 @@
     function renderSmartPick() {
       const mins = Number(document.getElementById('smartMinutes').value) || 90;
       const open = state.lessons
-        .filter(l => l.stage < 3)
+        .filter(l => l.stage < DONE_STAGE)
         .map(l => ({ ...l, eff: effMinutes(l.duration || 90) }))
         .filter(l => l.eff <= mins)
         .sort((a, b) => a.date.localeCompare(b.date));
