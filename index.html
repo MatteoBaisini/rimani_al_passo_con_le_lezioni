@@ -1375,7 +1375,6 @@
     function renderHeaderAndKPIs() {
       const scopeLessons = getScopedLessons();
       const scopeOpen = scopeLessons.filter(l => l.stage < 3);
-      const scopeDone = scopeLessons.filter(l => l.stage === 3);
 
       const baseMins = scopeOpen.reduce((s, l) => s + (l.duration || 90), 0);
       const adjMins = scopeOpen.reduce((s, l) => s + effMinutes(l.duration || 90), 0);
@@ -1417,12 +1416,11 @@
         <div class="bg-white dark:bg-cardDark px-5 py-4">
           <div class="text-[12px] font-medium text-[#71717A] dark:text-[#8E8E93]">${label}</div>
           <div class="mt-1 text-[24px] leading-8 font-semibold tabular-nums tracking-tight">${value}</div>
-          <div class="text-[11.5px] text-[#8E8E93] tabular-nums">${sub}</div>
+          ${sub ? `<div class="text-[11.5px] text-[#8E8E93] tabular-nums">${sub}</div>` : ''}
         </div>`;
       const daysLabel = daysNeeded === 1 ? 'giorno' : 'giorni';
-      const doneLabel = scopeDone.length === 1 ? 'completata' : 'completate';
       document.getElementById('kpiGrid').innerHTML = [
-        kpi('Da recuperare', scopeOpen.length, `${scopeDone.length} ${doneLabel}`),
+        kpi('Da recuperare', scopeOpen.length),
         kpi(`Tempo a ${state.speed}x`, formatHours(adjMins), `${formatHours(baseMins)} a velocità normale`),
         kpi('In pari entro', targetStr, daysNeeded ? `${daysNeeded} ${daysLabel} a ${dailyHrs.toFixed(1)}h al giorno` : 'Nessun arretrato'),
         kpi('In calendario', scheduledOpen, `su ${scopeOpen.length} da recuperare`)
