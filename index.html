@@ -34,16 +34,23 @@
       --safe-r: env(safe-area-inset-right, 0px);
       --safe-b: env(safe-area-inset-bottom, 0px);
       --safe-l: env(safe-area-inset-left, 0px);
+      /* Space kept free at the top of the screen */
+      --gap-t: var(--safe-t);
+    }
+    /* Opened from the Home screen: iPadOS does not always report the status bar / window
+       controls in safe-area-inset-top, so keep at least a fixed gap there. */
+    @media (display-mode: standalone) {
+      :root { --gap-t: max(var(--safe-t), 36px); }
     }
     /* 100vh is taller than the visible area in iOS standalone mode: use the dynamic height */
     .app-min-h { min-height: 100vh; min-height: 100dvh; }
-    .safe-y { padding-top: var(--safe-t); padding-bottom: var(--safe-b); }
+    .safe-y { padding-top: var(--gap-t); padding-bottom: var(--safe-b); }
     .safe-l { padding-left: var(--safe-l); }
     .safe-r { padding-right: var(--safe-r); }
     .safe-pb { padding-bottom: calc(5rem + var(--safe-b)); }
-    .topbar { height: calc(4rem + var(--safe-t)); padding-top: var(--safe-t); }
+    .topbar { height: calc(4rem + var(--gap-t)); padding-top: var(--gap-t); }
     .modal-wrap {
-      padding: max(1rem, var(--safe-t)) max(1rem, var(--safe-r)) max(1rem, var(--safe-b)) max(1rem, var(--safe-l));
+      padding: max(1rem, var(--gap-t)) max(1rem, var(--safe-r)) max(1rem, var(--safe-b)) max(1rem, var(--safe-l));
     }
     .toast-pos { right: max(1.25rem, var(--safe-r)); bottom: calc(1.25rem + var(--safe-b)); }
   </style>
@@ -91,7 +98,7 @@
     <!-- LEFT SIDEBAR                                                        -->
     <!-- =================================================================== -->
     <aside id="sidebar"
-      class="fixed inset-y-0 left-0 z-50 w-[256px] shrink-0 bg-white/95 dark:bg-cardDark/95 backdrop-blur-md border-r border-black/[0.08] dark:border-white/[0.08] flex flex-col transform -translate-x-full lg:translate-x-0 lg:sticky lg:top-0 lg:h-[100dvh] safe-y safe-l transition-transform duration-200 ease-out">
+      class="fixed inset-y-0 left-0 z-50 w-[256px] shrink-0 bg-white/95 dark:bg-cardDark/95 backdrop-blur-md border-r border-black/[0.08] dark:border-white/[0.08] flex flex-col transform -translate-x-full lg:translate-x-0 lg:static lg:z-auto lg:min-h-[100dvh] overflow-y-auto lg:overflow-visible safe-y safe-l transition-transform duration-200 ease-out">
 
       <!-- Brand Header -->
       <div class="h-16 px-4 flex items-center justify-between border-b border-black/[0.06] dark:border-white/[0.06] shrink-0">
@@ -118,7 +125,7 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 overflow-y-auto px-3 py-4 space-y-5">
+      <nav class="flex-1 lg:flex-none overflow-y-auto lg:overflow-visible px-3 py-4 space-y-5">
         <!-- Primary Views -->
         <div class="space-y-1">
           <button id="nav-all" onclick="setView('all')"
@@ -159,7 +166,7 @@
       </nav>
 
       <!-- Bottom Controls: Playback Speed, Daily Goal, Sync Pill -->
-      <div class="p-3.5 border-t border-black/[0.06] dark:border-white/[0.06] space-y-3 bg-porcelain/50 dark:bg-obsidian/40 shrink-0">
+      <div class="p-3.5 border-t lg:border-b border-black/[0.06] dark:border-white/[0.06] space-y-3 bg-porcelain/50 dark:bg-obsidian/40 shrink-0">
         <!-- Speed Pills -->
         <div>
           <div class="flex items-center justify-between mb-1.5">
@@ -205,7 +212,7 @@
     <div class="flex-1 min-w-0 flex flex-col">
 
       <!-- Sticky Topbar -->
-      <header class="topbar sticky top-0 z-30 px-4 sm:px-7 border-b border-black/[0.07] dark:border-white/[0.07] bg-porcelain/85 dark:bg-obsidian/85 backdrop-blur-md flex items-center justify-between gap-3">
+      <header class="topbar relative z-10 px-4 sm:px-7 border-b border-black/[0.07] dark:border-white/[0.07] bg-porcelain/85 dark:bg-obsidian/85 backdrop-blur-md flex items-center justify-between gap-3">
         <div class="flex items-center gap-3 min-w-0">
           <!-- Mobile Sidebar Button -->
           <button onclick="openMobileSidebar()" aria-label="Apri menu"
