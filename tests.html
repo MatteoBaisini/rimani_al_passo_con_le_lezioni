@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Test — Recupero Lezioni</title>
+  <style>
+    body { font: 14px/1.5 -apple-system, "Segoe UI", sans-serif; margin: 24px; background: #F6F6F4; color: #111113; }
+    h1 { font-size: 18px; margin: 0 0 4px; }
+    #summary { font-weight: 600; margin-bottom: 16px; }
+    .pass { color: #047857; }
+    .fail { color: #B91C1C; }
+    li { margin: 2px 0; }
+    pre { margin: 2px 0 8px 18px; color: #B91C1C; white-space: pre-wrap; }
+  </style>
+</head>
+<body>
+  <h1>Test della logica di stato e merge</h1>
+  <p>Apri con il server locale (<code>serve.ps1</code>) o su GitHub Pages: i moduli JS non si caricano da <code>file://</code>.</p>
+  <div id="summary">In esecuzione...</div>
+  <ul id="results"></ul>
+
+  <script type="module">
+    import { mergeStates, applySeeds, sanitizeState, runMigrations, freshState, TOMBSTONE_DAYS } from './js/state.js';
+    import { SEED_VERSION } from './js/data.js';
+
+    const results = [];
+    function test(name, fn) {
+      try { fn(); results.push({ name, ok: true }); }
+      catch (e) { results.push({ name, ok: false, err: e.message }); }
+    }
+    function eq(actual, expected, msg = '') {
+      const a = JSON.stringify(actual), b = JSON.stringify(expected);
+      if (a !== b) throw new Error(`${msg} atteso ${b}, ottenuto ${a}`);
+    }
+    function ok(cond, msg) { if (!cond) throw new Error(msg || 'condizione falsa'); }
+
+    const iso = msAgo => new Date(Date.now() - msAgo).toISOString();
+    const DAY = 86400000;
+    const lesson = (id, extra = {}) => ({ id, courseId: 'ACSO', date: '2026-11-01', type: 'Lezione', duration: 90, stage: 0, topic: '', url: '', notes: '', scheduled: '', ...extra });
+    const st = (lessons, extra = {}) => {
+      const s = freshState();
+      delete s.isFreshDefault;
+      return { ...s, lessons, deletedLessons: {}, updatedAt: iso(DAY), ...extra };
+    };
+    const ids = s => s.lessons.map(l => l.id).sort();
+
+    // ---- merge -------------------------------------------------------------
+    test('il progresso reale vince sulla copia mai modificata', () => {
+      const local = st([lesson('a')]);
+      const remote = st([lesson('a', { stage: 2, updatedAt: iso(DAY) })]);
+      const { merged } = mergeStates(local, remote);
+      eq(merged.lessons.find(l => l.id === 'a').stage, 2);
+    });
+
+    test('la modifica più recente vince', () => {
+      const local = st([lesson('a', { notes: 'vecchia', updatedAt: iso(2 * DAY) })]);
+      const remote = st([lesson('a', { notes: 'nuova', updatedAt: iso(DAY) })]);
+      eq(mergeStates(local, remote).merged.lessons.find(l => l.id === 'a').notes, 'nuova');
+    });
+
+    test('un\'eliminazione più recente della modifica rimuove la lezione', () => {
+      const local = st([lesson('a', { updatedAt: iso(3 * DAY) })]);
+      const remote = st([], { deletedLessons: { a: iso(DAY) } });
+      ok(!ids(mergeStates(local, remote).merged).includes('a'));
+    });
+
+    test('una modifica successiva all\'eliminazione la fa sopravvivere', () => {
+      const local = st([lesson('a', { updatedAt: iso(DAY) })]);
+      const remote = st([], { deletedLessons: { a: iso(3 * DAY) } });
+      ok(ids(mergeStates(local, remote).merged).includes('a'));
+    });
+
+    test('i tombstone più vecchi di TOMBSTONE_DAYS vengono scartati', () => {
+      const local = st([], { deletedLessons: { a: iso((TOMBSTONE_DAYS + 1) * DAY), b: iso(DAY) } });
+      const { merged } = mergeStates(local, st([]));
+      eq(Object.keys(merged.deletedLessons), ['b']);
+    });
+
+    test('ricollegamento: lezione sparita dal cloud e non toccata da allora viene scartata', () => {
+      const lastSync = Date.now() - 40 * DAY;
+      const local = st([lesson('vecchia', { updatedAt: iso(50 * DAY) }), lesson('nuova', { updatedAt: iso(5 * DAY) })]);
+      const remote = st([]);
+      const { merged } = mergeStates(local, remote, { prunedBefore: lastSync });
+      eq(ids(merged).filter(id => id === 'vecchia' || id === 'nuova'), ['nuova']);
+    });
+
+    test('senza ricollegamento la lezione solo locale resta', () => {
+      const local = st([lesson('vecchia', { updatedAt: iso(50 * DAY) })]);
+      ok(ids(mergeStates(local, st([])).merged).includes('vecchia'));
+    });
+
+    test('nessuna modifica: changedVsLocal e changedVsRemote falsi', () => {
+      const s = st([lesson('a', { updatedAt: iso(DAY) })]);
+      const r = mergeStates(s, JSON.parse(JSON.stringify(s)));
+      eq([r.changedVsLocal, r.changedVsRemote], [false, false]);
+    });
+
+    test('le impostazioni vengono dalla copia con updatedAt più recente', () => {
+      const local = st([], { speed: 2, updatedAt: iso(DAY) });
+      const remote = st([], { speed: 1.5, updatedAt: iso(2 * DAY) });
+      eq(mergeStates(local, remote).merged.speed, 2);
+    });
+
+    // ---- seeds -------------------------------------------------------------
+    const seeds = [
+      lesson('v1', { topic: 'uno' }),
+      lesson('v2', { topic: 'due', notes: 'n2', since: 2 }),
+      lesson('v2-del', { topic: 'x', since: 2 })
+    ];
+
+    test('seed: aggiunge le lezioni nuove e rispetta le eliminazioni', () => {
+      const s = st([lesson('v1', { topic: 'mio' })], { seedVersion: 1, deletedLessons: { 'v2-del': iso(DAY) } });
+      ok(applySeeds(s, seeds, 2));
+      eq(ids(s), ['v1', 'v2']);
+      eq(s.seedVersion, 2);
+      ok(!('since' in s.lessons.find(l => l.id === 'v2')), 'since non va salvato');
+    });
+
+    test('seed: completa argomento e note vuoti, non tocca quelli scritti', () => {
+      const s = st([lesson('v2', { notes: 'le mie note' })], { seedVersion: 1 });
+      applySeeds(s, seeds, 2);
+      const l = s.lessons.find(x => x.id === 'v2');
+      eq([l.topic, l.notes], ['due', 'le mie note']);
+    });
+
+    test('seed: già alla versione corrente non cambia nulla', () => {
+      const s = st([lesson('v1')], { seedVersion: 2 });
+      ok(!applySeeds(s, seeds, 2));
+      eq(ids(s), ['v1']);
+    });
+
+    test('stato senza seedVersion (salvato prima) passa alla versione 1 senza perdere lezioni', () => {
+      const s = st([lesson('mia', { updatedAt: iso(DAY) })]);
+      delete s.seedVersion;
+      runMigrations(s);
+      eq(s.seedVersion, SEED_VERSION);
+      ok(ids(s).includes('mia'));
+    });
+
+    // ---- validation ----------------------------------------------------------
+    test('sanitize: scarta id non sicuri e corregge i valori fuori scala', () => {
+      const s = st([lesson('ok', { stage: 9, duration: 5, url: 'javascript:alert(1)' }), lesson('x"><img>')]);
+      sanitizeState(s);
+      eq(ids(s), ['ok']);
+      const l = s.lessons[0];
+      eq([l.stage, l.duration, l.url], [0, 90, '']);
+    });
+
+    test('stati vecchi a 4 passi vengono riportati a 3', () => {
+      const s = st([lesson('a', { stage: 3 })], { stagesV2Migrated: false });
+      runMigrations(s);
+      eq(s.lessons[0].stage, 2);
+    });
+
+    // ---- report --------------------------------------------------------------
+    const failed = results.filter(r => !r.ok).length;
+    const summary = document.getElementById('summary');
+    summary.textContent = failed ? `${failed} test falliti su ${results.length}` : `Tutti i ${results.length} test passati`;
+    summary.className = failed ? 'fail' : 'pass';
+    document.getElementById('results').innerHTML = results.map(r =>
+      `<li class="${r.ok ? 'pass' : 'fail'}">${r.ok ? '✓' : '✗'} ${r.name}</li>${r.ok ? '' : `<pre>${r.err.replace(/</g, '&lt;')}</pre>`}`
+    ).join('');
+    window.__testResults = { passed: results.length - failed, failed };
+  </script>
+</body>
+</html>
