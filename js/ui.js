@@ -64,8 +64,11 @@ function openMobileSidebar() {
   document.getElementById('overlay').classList.remove('hidden');
 }
 
+// Also hides the blurred overlay: otherwise, after picking a view from the mobile menu,
+// it stays over the page and swallows every tap (iPhone only: on lg+ the sidebar is static)
 function closeMobileSidebar() {
   document.getElementById('sidebar').classList.add('-translate-x-full');
+  document.getElementById('overlay').classList.add('hidden');
 }
 
 function closeAllOverlays() {

@@ -6,7 +6,7 @@ import { scheduleCloudPush, syncWithSupabase, initSyncStatus } from './sync.js';
 import { closeAllOverlays, openAddModal } from './ui.js';
 
 // Shown in the sidebar: bump it on every release to check which version a device is running
-const APP_VERSION = '2026.11.26-3';
+const APP_VERSION = '2026.11.27-1';
 document.getElementById('appVersion').textContent = `v${APP_VERSION}`;
 
 loadState();
